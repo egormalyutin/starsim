@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd ~/Документы/lua/sim/app
+love ./
