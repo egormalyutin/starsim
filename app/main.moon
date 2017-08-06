@@ -30,7 +30,9 @@ love.load = ->
 	image = Image path: "resources/images/sprites/star1.png"
 
 love.update = (dt) ->
+	dev_enable()
 	lovebird.update!
+	dev_disable()
 
 love.draw = ->
 	g.hero\draw!

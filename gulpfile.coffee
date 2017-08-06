@@ -7,12 +7,15 @@ chmod	= require 'chmod'
 execf	= require('child_process').exec
 luamin	= require 'gulp-luaminify'
 replace = require 'gulp-replace'
+log 	= console.log
 
 gulp.task 'dist:lua', () ->
 	gulp
 		.src 'app/**/*.lua'
 
-		.pipe replace /dev_enable\(\)[\s\S]*dev_disable\(\)/gi, (match) ->
+		.pipe replace /dev_enable\(\)[\s\S]*?dev_disable\(\)/gi, (match) ->
+			log "Development block removed:"
+			log match
 			return ""
 
 		.pipe gulp.dest "test"
@@ -69,7 +72,7 @@ gulp.task 'build:win64', () ->
 		.pipe gulp.dest 'build/win64'
 
 gulp.task 'build', () ->
-	seq 'clean:build', 'copy:buildfiles', 'pack:love', [ 'build:linux32', 'build:linux64', 'build:win32', 'build:win64', ], 'script'
+	seq ['dist:lua', 'clean:build'], 'copy:buildfiles', 'pack:love', [ 'build:linux32', 'build:linux64', 'build:win32', 'build:win64', ], 'script'
 
 gulp.task 'script', () ->
 	execf './build.sh'

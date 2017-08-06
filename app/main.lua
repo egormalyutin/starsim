@@ -20,7 +20,9 @@ love.load = function()
   })
 end
 love.update = function(dt)
-  return lovebird.update()
+  dev_enable()
+  lovebird.update()
+  return dev_disable()
 end
 love.draw = function()
   g.hero:draw()
