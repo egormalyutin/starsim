@@ -39,37 +39,30 @@ gulp.task 'pack:love', () ->
 
 		.pipe zip.dest 'build/game.love'
 
+
+###
+
+gulp.task 'build:example', () ->
+	gulp
+		.src [ 'build/example', 'build/game.love' ]
+
+		.pipe concat 'example'
+
+		.pipe gulp.dest 'build'
+
+###
+
 gulp.task 'build:linux32', () ->
-	gulp
-		.src [ 'build/linux32', 'build/game.love' ]
+	gulp.src(['build/linux32', 'build/game.love']).pipe(concat( 'linux32' )).pipe(gulp.dest 'build')
 
-		.pipe concat 'linux32'
-
-		.pipe gulp.dest 'build'
-
-gulp.task 'build:linux64', () ->
-	gulp
-		.src [ 'build/linux64', 'build/game.love' ]
-
-		.pipe concat 'linux64'
-
-		.pipe gulp.dest 'build'
+gulp.task 'build:linux62', () ->
+	gulp.src(['build/linux64', 'build/game.love']).pipe(concat( 'linux64' )).pipe(gulp.dest 'build')
 
 gulp.task 'build:win32', () ->
-	gulp
-		.src [ 'build/win32/game.exe', 'build/game.love' ]
-
-		.pipe concat 'game.exe'
-
-		.pipe gulp.dest 'build/win32'
+	gulp.src(['build/win32', 'build/game.love']).pipe(concat( 'win32' )).pipe(gulp.dest 'build')
 
 gulp.task 'build:win64', () ->
-	gulp
-		.src [ 'build/win64/game.exe', 'build/game.love' ]
-
-		.pipe concat 'game.exe'
-
-		.pipe gulp.dest 'build/win64'
+	gulp.src(['build/win64', 'build/game.love']).pipe(concat( 'win64' )).pipe(gulp.dest 'build')
 
 gulp.task 'build', () ->
 	seq ['dist:lua', 'clean:build'], 'copy:buildfiles', 'pack:love', [ 'build:linux32', 'build:linux64', 'build:win32', 'build:win64', ], 'script'

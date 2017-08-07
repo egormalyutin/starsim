@@ -41,20 +41,32 @@ gulp.task('pack:love', function() {
   return gulp.src('app/**/*').pipe(zip.dest('build/game.love'));
 });
 
+
+/*
+
+gulp.task 'build:example', () ->
+	gulp
+		.src [ 'build/example', 'build/game.love' ]
+
+		.pipe concat 'example'
+
+		.pipe gulp.dest 'build'
+ */
+
 gulp.task('build:linux32', function() {
   return gulp.src(['build/linux32', 'build/game.love']).pipe(concat('linux32')).pipe(gulp.dest('build'));
 });
 
-gulp.task('build:linux64', function() {
+gulp.task('build:linux62', function() {
   return gulp.src(['build/linux64', 'build/game.love']).pipe(concat('linux64')).pipe(gulp.dest('build'));
 });
 
 gulp.task('build:win32', function() {
-  return gulp.src(['build/win32/game.exe', 'build/game.love']).pipe(concat('game.exe')).pipe(gulp.dest('build/win32'));
+  return gulp.src(['build/win32', 'build/game.love']).pipe(concat('win32')).pipe(gulp.dest('build'));
 });
 
 gulp.task('build:win64', function() {
-  return gulp.src(['build/win64/game.exe', 'build/game.love']).pipe(concat('game.exe')).pipe(gulp.dest('build/win64'));
+  return gulp.src(['build/win64', 'build/game.love']).pipe(concat('win64')).pipe(gulp.dest('build'));
 });
 
 gulp.task('build', function() {
