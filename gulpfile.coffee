@@ -18,8 +18,6 @@ gulp.task 'dist:lua', () ->
 			log match
 			return ""
 
-		.pipe gulp.dest "test"
-
 		.pipe luamin()
 
 		.pipe gulp.dest 'dist'

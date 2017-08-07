@@ -26,7 +26,7 @@ gulp.task('dist:lua', function() {
     log("Development block removed:");
     log(match);
     return "";
-  })).pipe(gulp.dest("test")).pipe(luamin()).pipe(gulp.dest('dist'));
+  })).pipe(luamin()).pipe(gulp.dest('dist'));
 });
 
 gulp.task('copy:buildfiles', function() {
