@@ -5,6 +5,7 @@ return class
 			y: 	128
 			width: 32
 			height: 32
+			scale: {x: 1, y: 1}
 			color: { 255, 255, 255 }
 
 		if settings != nil
@@ -16,4 +17,4 @@ return class
 		@image = love.graphics.newImage @s.path
 
 	draw: =>
-		love.graphics.draw @image, @s.x, @s.y, nil, 0.2, 0.2
+		love.graphics.draw @image, @s.x, @s.y, nil, @s.scale.x, @s.scale.y

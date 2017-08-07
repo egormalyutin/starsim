@@ -2,7 +2,7 @@ do
   local _class_0
   local _base_0 = {
     draw = function(self)
-      return love.graphics.draw(self.image, self.s.x, self.s.y, nil, 0.2, 0.2)
+      return love.graphics.draw(self.image, self.s.x, self.s.y, nil, self.s.scale.x, self.s.scale.y)
     end
   }
   _base_0.__index = _base_0
@@ -13,6 +13,10 @@ do
         y = 128,
         width = 32,
         height = 32,
+        scale = {
+          x = 1,
+          y = 1
+        },
         color = {
           255,
           255,
