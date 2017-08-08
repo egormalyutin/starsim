@@ -1,0 +1,1 @@
+do local a;local b={}b.__index=b;a=setmetatable({__init=function()end,__base=b,__name=nil},{__index=b,__call=function(c,...)local d=setmetatable({},b)c.__init(d,...)return d end})b.__class=a;return a end
