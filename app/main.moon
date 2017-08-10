@@ -51,6 +51,7 @@ defaultSize = () ->
 		game.rooms.menu.buttons.start.y = game.window.position.y * 20
 
 love.load = ->
+
 	---------------- WINDOW ------------------
 	love.window.setTitle 'STAR SIMULATOR' 
 	love.graphics.setBackgroundColor 0, 0, 0
@@ -67,6 +68,7 @@ love.load = ->
 		font:		love.graphics.newFont
 		setFont:	love.graphics.setFont
 		text:		love.graphics.print
+		textf:		love.graphics.printf
 
 		-- Classes
 		Button: require "scripts/button"
@@ -94,7 +96,12 @@ love.load = ->
 
 	-- Set size to default
 	defaultSize!
-	
+
+	export button
+	button = game.Button "lol", 200, 300
+
+	return
+
 
 love.update = (dt) ->
 	if game.pressed('lctrl') and game.pressed('lshift') and game.pressed('r')
@@ -103,6 +110,7 @@ love.update = (dt) ->
 	if game.room == "menu"
 		-- Rotate sky
 		game.rooms.menu.sky.angle += 0.001
+	return
 
 
 love.draw = ->
@@ -118,6 +126,10 @@ love.draw = ->
 
 		-- Draw text of buttons
 		game.text "Начать игру", game.rooms.menu.buttons.start.x, game.rooms.menu.buttons.start.y, nil, game.rooms.menu.buttons.scale
+
+		button\draw!
+
+	return
 
 -- Reload positions and sizes, when window changes size
 love.resize = defaultSize

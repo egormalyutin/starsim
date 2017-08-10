@@ -41,6 +41,7 @@ love.load = function()
     font = love.graphics.newFont,
     setFont = love.graphics.setFont,
     text = love.graphics.print,
+    textf = love.graphics.printf,
     Button = require("scripts/button"),
     room = "menu",
     window = { },
@@ -59,7 +60,8 @@ love.load = function()
   game.fonts = {
     menu = game.font("resources/fonts/menu.ttf", 50)
   }
-  return defaultSize()
+  defaultSize()
+  button = game.Button("lol", 200, 300)
 end
 love.update = function(dt)
   if game.pressed('lctrl') and game.pressed('lshift') and game.pressed('r') then
@@ -74,7 +76,8 @@ love.draw = function()
     game.setFont(game.fonts.menu)
     game.draw(game.images.sky, game.window.width / 2, game.window.height / 2, game.rooms.menu.sky.angle, nil, nil, 1920, 1080)
     game.draw(game.images.logo, game.rooms.menu.logo.x, game.rooms.menu.logo.y, nil, game.rooms.menu.logo.scale)
-    return game.text("Начать игру", game.rooms.menu.buttons.start.x, game.rooms.menu.buttons.start.y, nil, game.rooms.menu.buttons.scale)
+    game.text("Начать игру", game.rooms.menu.buttons.start.x, game.rooms.menu.buttons.start.y, nil, game.rooms.menu.buttons.scale)
+    button:draw()
   end
 end
 love.resize = defaultSize

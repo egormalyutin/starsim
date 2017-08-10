@@ -1,6 +1,10 @@
 do
   local _class_0
-  local _base_0 = { }
+  local _base_0 = {
+    draw = function()
+      return love.graphics.print("lol", 100, 100)
+    end
+  }
   _base_0.__index = _base_0
   _class_0 = setmetatable({
     __init = function() end,
