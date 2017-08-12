@@ -1,12 +1,17 @@
 gulp 	= require 'gulp'
-concat 	= require 'gulp-concat'
-zip		= require 'gulp-vinyl-zip'
-del		= require 'del'
 seq		= require 'run-sequence'
+
+cache	= require 'gulp-cache'
+concat 	= require 'gulp-concat'
 chmod	= require 'gulp-chmod'
-execf	= require('child_process').exec
+image	= require 'gulp-imagemin'
+del		= require 'del'
 luamin	= require 'gulp-luaminify'
 replace = require 'gulp-replace'
+zip		= require 'gulp-vinyl-zip'
+
+execf	= require('child_process').exec
+
 log 	= console.log
 
 ###########################
@@ -23,6 +28,14 @@ gulp.task 'dist:lua', () ->
 			return ""
 
 		.pipe luamin()
+
+		.pipe gulp.dest 'dist'
+
+gulp.task 'dist:images', () ->
+	gulp
+		.src 'dist/**/*.+(png|jpg|jpeg|gif|svg)'
+
+		.pipe cache image interplaced: true
 
 		.pipe gulp.dest 'dist'
 		
@@ -84,7 +97,7 @@ gulp.task 'exe:win32', () ->
 gulp.task 'exe:win64', () ->
 	gulp.src ['build/win64/game.exe', 'build/game.love']
 		.pipe concat 'game.exe'
-		.pipe chmod 0o755
+		.pipe chmod 0x755
 		.pipe gulp.dest 'build/win64'
 
 gulp.task 'exe', ['exe:linux32', 'exe:linux64', 'exe:win32', 'exe:win64']
@@ -97,7 +110,7 @@ gulp.task 'build', () ->
 	seq(
 		[ 'clean:build', 'clean:dist' ]
 		[ 'copy:buildfiles', 'copy:dist' ]
-		'dist:lua'
+		[ 'dist:lua', 'dist:images' ]
 		'dist:vendor'
 		'package:love'
 		'exe'

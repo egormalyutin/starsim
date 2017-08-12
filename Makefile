@@ -4,10 +4,10 @@ gulp:
 	gulp
 
 deps:
-	npm i -g gulp
+	npm i -g gulp-cli
 	npm i
 
 cm:
 	coffee -w -b -c ./ &
-	moonw &
+	./moonw &
 	sleep infinity

@@ -3,7 +3,7 @@ dev_enable = function() end
 local dev_disable
 dev_disable = function() end
 dev_enable()
-local lovebird = require('scripts/debug/lovebird')
+local lovebird = require('scripts/libs/lovebird')
 dev_disable()
 local defaultSize
 defaultSize = function()

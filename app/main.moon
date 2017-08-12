@@ -2,7 +2,7 @@ dev_enable = () ->
 dev_disable = () ->
 
 dev_enable()
-lovebird	= require 'scripts/debug/lovebird'
+lovebird	= require 'scripts/libs/lovebird'
 dev_disable()
 
 defaultSize = () ->

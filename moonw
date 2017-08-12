@@ -1,0 +1,25 @@
+#!/usr/bin/node
+// I lose .coffee file :P
+var exec, log, watch;
+
+watch = require('chokidar');
+
+exec = require('child_process').exec;
+
+log = console.log;
+
+watch.watch('.').on('all', function(event, path) {
+  if (event !== 'inlink' && path.match(/\.moon$/i)) {
+    return exec('moonc ' + path, function(err, stdout, stderr) {
+      if (err) {
+        log(err);
+      }
+      if (stderr) {
+        log(stderr);
+      }
+      if (stdout) {
+        return log(stdout);
+      }
+    });
+  }
+});
