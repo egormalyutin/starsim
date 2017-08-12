@@ -11,7 +11,7 @@ del = require('del');
 
 seq = require('run-sequence');
 
-chmod = require('chmod');
+chmod = require('gulp-chmod');
 
 execf = require('child_process').exec;
 
@@ -22,59 +22,57 @@ replace = require('gulp-replace');
 log = console.log;
 
 gulp.task('dist:lua', function() {
-  return gulp.src('app/**/*.lua').pipe(replace(/dev_enable\(\)[\s\S]*?dev_disable\(\)/gi, function(match) {
+  return gulp.src('dist/**/*.lua').pipe(replace(/dev_enable\(\)[\s\S]*?dev_disable\(\)/gi, function(match) {
     log("Development block removed:");
     log(match);
     return "";
   })).pipe(luamin()).pipe(gulp.dest('dist'));
 });
 
+gulp.task('dist:vendor', function() {
+  return del("dist/**/*.moon");
+});
+
 gulp.task('copy:buildfiles', function() {
   return gulp.src('buildfiles/**/*').pipe(gulp.dest('build'));
+});
+
+gulp.task('copy:dist', function() {
+  return gulp.src('app/**/*').pipe(gulp.dest('dist'));
 });
 
 gulp.task('clean:build', function() {
   return del('build');
 });
 
-gulp.task('pack:love', function() {
+gulp.task('clean:dist', function() {
+  return del('dist');
+});
+
+gulp.task('package:love', function() {
   return gulp.src('dist/**/*').pipe(zip.dest('build/game.love'));
 });
 
-
-/*
-
-gulp.task 'build:example', () ->
-	gulp
-		.src [ 'build/example', 'build/game.love' ]
-
-		.pipe concat 'example'
-
-		.pipe gulp.dest 'build'
- */
-
-gulp.task('build:linux32', function() {
-  return gulp.src(['build/linux32', 'build/game.love']).pipe(concat('linux32')).pipe(gulp.dest('build'));
+gulp.task('exe:linux32', function() {
+  return gulp.src(['build/linux32', 'build/game.love']).pipe(concat('linux32')).pipe(chmod(0x1ed)).pipe(gulp.dest('build'));
 });
 
-gulp.task('build:linux64', function() {
-  return gulp.src(['build/linux64', 'build/game.love']).pipe(concat('linux64')).pipe(gulp.dest('build'));
+gulp.task('exe:linux64', function() {
+  return gulp.src(['build/linux64', 'build/game.love']).pipe(concat('linux64')).pipe(chmod(0x1ed)).pipe(gulp.dest('build'));
 });
 
-gulp.task('build:win32', function() {
-  return gulp.src(['build/win32/game.exe', 'build/game.love']).pipe(concat('game.exe')).pipe(gulp.dest('build/win32'));
+gulp.task('exe:win32', function() {
+  return gulp.src(['build/win32/game.exe', 'build/game.love']).pipe(concat('game.exe')).pipe(chmod(0x1ed)).pipe(gulp.dest('build/win32'));
 });
 
-gulp.task('build:win64', function() {
-  return gulp.src(['build/win64/game.exe', 'build/game.love']).pipe(concat('game.exe')).pipe(gulp.dest('build/win64'));
+gulp.task('exe:win64', function() {
+  return gulp.src(['build/win64/game.exe', 'build/game.love']).pipe(concat('game.exe')).pipe(chmod(0x1ed)).pipe(gulp.dest('build/win64'));
 });
+
+gulp.task('exe', ['exe:linux32', 'exe:linux64', 'exe:win32', 'exe:win64']);
 
 gulp.task('build', function() {
-  return seq('dist:lua', 'clean:build', 'copy:buildfiles', 'pack:love', ['build:linux32', 'build:linux64', 'build:win32', 'build:win64'], 'script');
-});
-
-gulp.task('script', function() {
-  return execf('./build.sh');
+  return seq(['clean:build', 'clean:dist'], ['copy:buildfiles', 'copy:dist'], 'dist:lua', 'dist:vendor', 'package:love', 'exe');
 });
 
 gulp.task('default', ['build']);
