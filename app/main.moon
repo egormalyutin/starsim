@@ -70,9 +70,6 @@ love.load = ->
 		text:		love.graphics.print
 		textf:		love.graphics.printf
 
-		-- Classes
-		Button: require "scripts/button"
-
 		-- Default room
 		room: "menu"
 
@@ -96,9 +93,6 @@ love.load = ->
 
 	-- Set size to default
 	defaultSize!
-
-	export button
-	button = game.Button "lol", 200, 300
 
 	return
 
@@ -126,9 +120,6 @@ love.draw = ->
 
 		-- Draw text of buttons
 		game.text "Начать игру", game.rooms.menu.buttons.start.x, game.rooms.menu.buttons.start.y, nil, game.rooms.menu.buttons.scale
-
-		button\draw!
-
 	return
 
 -- Reload positions and sizes, when window changes size

@@ -38,7 +38,7 @@ gulp.task('clean:build', function() {
 });
 
 gulp.task('pack:love', function() {
-  return gulp.src('app/**/*').pipe(zip.dest('build/game.love'));
+  return gulp.src('dist/**/*').pipe(zip.dest('build/game.love'));
 });
 
 

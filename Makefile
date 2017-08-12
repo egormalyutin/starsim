@@ -4,6 +4,7 @@ gulp:
 	gulp
 
 deps:
+	npm i -g gulp
 	npm i
 
 cm:

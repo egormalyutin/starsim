@@ -1,13 +1,15 @@
 do
   local _class_0
   local _base_0 = {
-    draw = function()
-      return love.graphics.print("lol", 100, 100)
+    draw = function(self)
+      return love.graphics.printf(self.text, self.x, self.y, self.limit)
     end
   }
   _base_0.__index = _base_0
   _class_0 = setmetatable({
-    __init = function() end,
+    __init = function(self, text, x, y, limit)
+      self.text, self.x, self.y, self.limit = text, x, y, limit
+    end,
     __base = _base_0,
     __name = nil
   }, {

@@ -21,7 +21,7 @@ gulp.task 'dist:lua', () ->
 		.pipe luamin()
 
 		.pipe gulp.dest 'dist'
-
+		
 gulp.task 'copy:buildfiles', () ->
 	gulp
 		.src 'buildfiles/**/*'
@@ -33,7 +33,7 @@ gulp.task 'clean:build', () ->
 
 gulp.task 'pack:love', () ->
 	gulp
-		.src 'app/**/*'
+		.src 'dist/**/*'
 
 		.pipe zip.dest 'build/game.love'
 

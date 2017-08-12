@@ -17,6 +17,7 @@
     "gulp-luaminify": "0.0.1",
     "gulp-replace": "0.6.1",
     "gulp-vinyl-zip": "2.0.0",
-    "run-sequence": "2.0.0"
+    "run-sequence": "2.0.0",
+    "sharp": "0.18.2"
   }
 }
