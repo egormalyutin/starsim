@@ -20,11 +20,11 @@ defaultSize = () ->
 
 		game.window.position = {}
 
-		-- Get abstract "position" value
+		-- Get abstract "position" metric
 		game.window.position.x = game.window.width  / 100
 		game.window.position.y = game.window.height / 100
 
-		-- Get abstract "scale" value
+		-- Get abstract "scale" metric
 		game.window.scale = game.window.width / 1366
 
 		--------------------------------------------
@@ -41,14 +41,37 @@ defaultSize = () ->
 		--------------------------------------------
 
 		-- Create new boject and set buttons size
-		game.rooms.menu.buttons = scale: game.window.scale * 0.8
+		game.rooms.menu.buttons = {}
+
+		game.fonts.menu = game.font "resources/fonts/menu.ttf", math.floor(game.window.scale * 50)
 
 		-- Create buttons
-		game.rooms.menu.buttons.start = {}
 
-		-- Get "Start play" button position
-		game.rooms.menu.buttons.start.x = game.window.position.x * 10
-		game.rooms.menu.buttons.start.y = game.window.position.y * 20
+		game.rooms.menu.buttons.all = game.ui.Filter { "menu" }
+
+		game.ui.destroy game.rooms.menu.buttons.all
+
+		game.rooms.menu.buttons.start = game.ui.Element {
+			draw: =>
+				-- Draw text of buttons
+
+				game.text "START GAME", 0, 0, nil
+
+			x: math.floor(game.window.position.x * 10)
+			y: math.floor(game.window.position.y * 20)
+
+			width: 550 
+			height: 500
+
+			focus: { ->
+				print "LOL"
+			}
+
+			tags: {"menu"}
+
+		}
+
+		game.rooms.menu.buttons.all\update!
 
 love.load = ->
 
@@ -73,6 +96,8 @@ love.load = ->
 		-- Default room
 		room: "menu"
 
+		-- Libraries
+		ui: require 'scripts/libs/ui'
 
 		window: {}
 
@@ -104,6 +129,9 @@ love.update = (dt) ->
 	if game.room == "menu"
 		-- Rotate sky
 		game.rooms.menu.sky.angle += 0.001
+
+		game.ui.update game.rooms.menu.buttons.all
+
 	return
 
 
@@ -118,8 +146,8 @@ love.draw = ->
 		-- Draw logo
 		game.draw game.images.logo, game.rooms.menu.logo.x, game.rooms.menu.logo.y, nil, game.rooms.menu.logo.scale
 
-		-- Draw text of buttons
-		game.text "Начать игру", game.rooms.menu.buttons.start.x, game.rooms.menu.buttons.start.y, nil, game.rooms.menu.buttons.scale
+		game.ui.draw game.rooms.menu.buttons.all
+
 	return
 
 -- Reload positions and sizes, when window changes size

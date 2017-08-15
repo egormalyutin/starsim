@@ -23,12 +23,30 @@ defaultSize = function()
     game.rooms.menu.logo.x = game.window.position.x * 5
     game.rooms.menu.logo.y = game.window.position.y * 5
     game.rooms.menu.logo.scale = game.window.scale * 0.8
-    game.rooms.menu.buttons = {
-      scale = game.window.scale * 0.8
-    }
-    game.rooms.menu.buttons.start = { }
-    game.rooms.menu.buttons.start.x = game.window.position.x * 10
-    game.rooms.menu.buttons.start.y = game.window.position.y * 20
+    game.rooms.menu.buttons = { }
+    game.fonts.menu = game.font("resources/fonts/menu.ttf", math.floor(game.window.scale * 50))
+    game.rooms.menu.buttons.all = game.ui.Filter({
+      "menu"
+    })
+    game.ui.destroy(game.rooms.menu.buttons.all)
+    game.rooms.menu.buttons.start = game.ui.Element({
+      draw = function(self)
+        return game.text("START GAME", 0, 0, nil)
+      end,
+      x = math.floor(game.window.position.x * 10),
+      y = math.floor(game.window.position.y * 20),
+      width = 550,
+      height = 500,
+      focus = {
+        function()
+          return print("LOL")
+        end
+      },
+      tags = {
+        "menu"
+      }
+    })
+    return game.rooms.menu.buttons.all:update()
   end
 end
 love.load = function()
@@ -43,6 +61,7 @@ love.load = function()
     text = love.graphics.print,
     textf = love.graphics.printf,
     room = "menu",
+    ui = require('scripts/libs/ui'),
     window = { },
     rooms = {
       menu = {
@@ -67,6 +86,7 @@ love.update = function(dt)
   end
   if game.room == "menu" then
     game.rooms.menu.sky.angle = game.rooms.menu.sky.angle + 0.001
+    game.ui.update(game.rooms.menu.buttons.all)
   end
 end
 love.draw = function()
@@ -74,7 +94,7 @@ love.draw = function()
     game.setFont(game.fonts.menu)
     game.draw(game.images.sky, game.window.width / 2, game.window.height / 2, game.rooms.menu.sky.angle, nil, nil, 1920, 1080)
     game.draw(game.images.logo, game.rooms.menu.logo.x, game.rooms.menu.logo.y, nil, game.rooms.menu.logo.scale)
-    game.text("Начать игру", game.rooms.menu.buttons.start.x, game.rooms.menu.buttons.start.y, nil, game.rooms.menu.buttons.scale)
+    game.ui.draw(game.rooms.menu.buttons.all)
   end
 end
 love.resize = defaultSize

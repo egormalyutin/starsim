@@ -9,5 +9,5 @@ deps:
 
 cm:
 	coffee -w -b -c ./ &
-	./moonscript &
+	./moonw &
 	sleep infinity
