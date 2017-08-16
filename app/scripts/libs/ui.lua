@@ -116,84 +116,101 @@ do
   local _class_0
   local _base_0 = {
     draw = function(self)
-      love.graphics.setColor(255, 255, 255, 255)
-      love.graphics.setBlendMode("alpha", "premultiplied")
       love.graphics.setCanvas(self.canvas)
       love.graphics.clear()
       self:drawFunction()
       love.graphics.setCanvas()
-      love.graphics.setBlendMode("alpha")
-      return love.graphics.draw(self.canvas, self.x, self.y, self.r, self.sx, self.sy, self.ox, self.oy, self.kx, self.ky)
+      love.graphics.setColor(255, 255, 255, 255)
+      love.graphics.setBlendMode("alpha", "premultiplied")
+      love.graphics.draw(self.canvas, self.x, self.y, self.r, self.sx, self.sy, self.ox, self.oy, self.kx, self.ky)
+      return love.graphics.setBlendMode("alpha")
     end,
     mousepressed = function(self, x, y, button)
       x = x or love.mouse.getX()
       y = y or love.mouse.getY()
       if (x > self.x) and (x < (self.x + self.width)) and (y > self.y) and (y < (self.y + self.height)) then
-        if self.on.mousepressed ~= nil then
+        if self.on.mousepressedbare ~= nil then
+          for _, listener in pairs(self.on.mousepressedbare) do
+            listener(self, x, y, button)
+          end
+        end
+        if (self.on.mousepressed ~= nil) and (not self._pressed) then
           for _, listener in pairs(self.on.mousepressed) do
-            listener(x, y, button)
+            listener(self, x, y, button)
           end
         end
-        if (self.on.mousepressedonce ~= nil) and (not self._pressed) then
-          for _, listener in pairs(self.on.mousepressedonce) do
-            listener(x, y, button)
-          end
-        end
-        self._pressed = true
+        return self:__setPressed(true)
       end
     end,
     mousereleased = function(self, x, y, button)
       x = x or love.mouse.getX()
       y = y or love.mouse.getY()
       if (x > self.x) and (x < (self.x + self.width)) and (y > self.y) and (y < (self.y + self.height)) then
-        if self.on.mousereleased ~= nil then
+        if self.on.mousereleasedbare ~= nil then
+          for _, listener in pairs(self.on.mousereleasedbare) do
+            listener(self, x, y, button)
+          end
+        end
+        if (self.on.mousereleased ~= nil) and (self._pressed) then
           for _, listener in pairs(self.on.mousereleased) do
-            listener(x, y, button)
+            listener(self, x, y, button)
           end
         end
-        if (self.on.mousereleasedonce ~= nil) and (self._pressed) then
-          for _, listener in pairs(self.on.mousereleasedonce) do
-            listener(x, y, button)
-          end
-        end
-        self._pressed = false
+        return self:__setPressed(false)
       end
     end,
     update = function(self, x, y)
       x = x or love.mouse.getX()
       y = y or love.mouse.getY()
+      self:updateFunction(x, y)
       if (x > self.x) and (x < (self.x + self.width)) and (y > self.y) and (y < (self.y + self.height)) then
-        if self.on.mousefocus ~= nil then
+        if self.on.mousefocusbare ~= nil then
+          for _, listener in pairs(self.on.mousefocusbare) do
+            listener(self, x, y, button)
+          end
+        end
+        if (self.on.mousefocus ~= nil) and (not self._focused) then
           for _, listener in pairs(self.on.mousefocus) do
-            listener(x, y, button)
+            listener(self, x, y, button)
           end
         end
-        if (self.on.mousefocusonce ~= nil) and (not self._focused) then
-          for _, listener in pairs(self.on.mousefocusonce) do
-            listener(x, y, button)
-          end
-        end
-        self._focused = true
+        return self:__setFocused(true)
       else
-        if self.on.mouseblur ~= nil then
+        if self.on.mouseblurbare ~= nil then
+          for _, listener in pairs(self.on.mouseblurbare) do
+            listener(self, x, y, button)
+          end
+        end
+        if (self.on.mouseblur ~= nil) and (self._focused) then
           for _, listener in pairs(self.on.mouseblur) do
-            listener(x, y, button)
+            listener(self, x, y, button)
           end
         end
-        if (self.on.mousebluronce ~= nil) and (self._focused) then
-          for _, listener in pairs(self.on.mousebluronce) do
-            listener(x, y, button)
-          end
-        end
-        self._focused = false
+        return self:__setFocused(false)
       end
+    end,
+    __setPressed = function(self, value)
+      self._pressed = value
+      self.pressed = value
+      self.press = value
+      self.release = not value
+      self.released = not value
+    end,
+    __setFocused = function(self, value)
+      self._focused = value
+      self.focused = value
+      self.focus = value
+      self.blured = not value
+      self.blur = not value
     end
   }
   _base_0.__index = _base_0
   _class_0 = setmetatable({
     __init = function(self, s)
       self.drawFunction = s.draw or function() end
+      self.updateFunction = s.update or function() end
       self.drawf = self.drawFunction
+      self.updatef = self.updateFunction
       self.canvas = love.graphics.newCanvas()
       self.x = s.x
       self.y = s.y
@@ -204,21 +221,68 @@ do
       self.oy = s.oy
       self.kx = s.kx
       self.ky = s.ky
-      self.data = { }
+      self.data = s.data or { }
       self.width = s.width or 0
       self.height = s.height or 0
       self.tags = s.tags or { }
       table.insert(ui.elements, self)
-      self.on = {
-        mousepressed = s.mousepressedbare or s.pressedbare or { },
-        mousepressedonce = s.mousepressed or s.pressed or { },
-        mousereleased = s.mousereleasedbare or s.releasedbare or { },
-        mousereleasedonce = s.mousereleased or s.released or { },
-        mouseblur = s.mouseblurbare or s.blurbare or { },
-        mousebluronce = s.mouseblur or s.blur or { },
-        mousefocus = s.mousefocusbare or s.bare or { },
-        mousefocusonce = s.mousefocus or s.focus or { }
-      }
+      self.on = { }
+      if type(s.mousepressedbare) == "function" then
+        self.on.mousepressedbare = {
+          s.mousepressedbare
+        }
+      else
+        self.on.mousepressedbare = s.mousepressedbare
+      end
+      if type(s.mousepressed) == "function" then
+        self.on.mousepressed = {
+          s.mousepressed
+        }
+      else
+        self.on.mousepressed = s.mousepressed
+      end
+      if type(s.mousereleasedbare) == "function" then
+        self.on.mousereleasedbare = {
+          s.mousereleasedbare
+        }
+      else
+        self.on.mousereleasedbare = s.mousereleasedbare
+      end
+      if type(s.mousereleased) == "function" then
+        self.on.mousereleased = {
+          s.mousereleased
+        }
+      else
+        self.on.mousereleased = s.mousereleased
+      end
+      if type(s.mousefocusbare) == "function" then
+        self.on.mousefocusbare = {
+          s.mousefocusbare
+        }
+      else
+        self.on.mousefocusbare = s.mousefocusbare
+      end
+      if type(s.mousefocus) == "function" then
+        self.on.mousefocus = {
+          s.mousefocus
+        }
+      else
+        self.on.mousefocus = s.mousefocus
+      end
+      if type(s.mouseblurbare) == "function" then
+        self.on.mouseblurbare = {
+          s.mouseblurbare
+        }
+      else
+        self.on.mouseblurbare = s.mouseblurbare
+      end
+      if type(s.mouseblur) == "function" then
+        self.on.mouseblur = {
+          s.mouseblur
+        }
+      else
+        self.on.mouseblur = s.mouseblur
+      end
       self._focused = false
       self._pressed = false
     end,

@@ -12,76 +12,67 @@ defaultSize = () ->
 		love.window.setFullscreen 0
 		love.window.setMode 1366, 768
 
+	-- Calculate window height and width
+	sizes.width, sizes.height = love.window.getMode!
+
+	--------------------------------------------
+
+	sizes.position = {}
+
+	-- Get abstract "position" metric
+	sizes.position.x = math.floor sizes.width  / 100
+	sizes.position.y = math.floor sizes.height / 100
+
+	-- Get abstract "scale" metric
+	sizes.scale = sizes.width / 1366
+
 	if game.room == "menu"
-		-- Calculate window height and width
-		game.window.width, game.window.height = love.window.getMode!
-
-		--------------------------------------------
-
-		game.window.position = {}
-
-		-- Get abstract "position" metric
-		game.window.position.x = game.window.width  / 100
-		game.window.position.y = game.window.height / 100
-
-		-- Get abstract "scale" metric
-		game.window.scale = game.window.width / 1366
-
-		--------------------------------------------
-
-		game.rooms.menu.logo = {}
-
-		-- Get logo position
-		game.rooms.menu.logo.x = game.window.position.x * 5
-		game.rooms.menu.logo.y = game.window.position.y * 5
-
-		-- Get logo scale
-		game.rooms.menu.logo.scale = game.window.scale * 0.8  
-
-		--------------------------------------------
-
+		
 		-- Create new boject and set buttons size
-		game.rooms.menu.buttons = {}
+		rooms.menu.ui = {}
 
-		game.fonts.menu = game.font "resources/fonts/menu.ttf", math.floor(game.window.scale * 50)
+		game.fonts = 
+			buttonSize: math.floor sizes.scale * 50
+			logoSize: math.floor sizes.scale * 100
 
+		game.fonts.menu = love.graphics.newFont "resources/fonts/menu.ttf", game.fonts.buttonSize 
+		game.fonts.logo = love.graphics.newFont "resources/fonts/logo.ttf", game.fonts.logoSize
+		
 		-- Create buttons
 
-		game.rooms.menu.buttons.all = game.ui.Filter { "menu" }
+		rooms.menu.ui.all = game.ui.Filter { "menu" }
 
-		game.ui.destroy game.rooms.menu.buttons.all
+		game.ui.destroy rooms.menu.ui.all
 
-		game.rooms.menu.buttons.start = game.ui.Element {
-			draw: =>
-				-- Draw text of buttons
+		-- Load UI
+		rooms.menu.ui.button = require('scripts/rooms/menu/button')
+		rooms.menu.ui.logo  = require('scripts/rooms/menu/logo')()
 
-				game.text "START GAME", 0, 0, nil
 
-			x: math.floor(game.window.position.x * 10)
-			y: math.floor(game.window.position.y * 20)
+		-- Create buttons
+		rooms.menu.ui.start = rooms.menu.ui.button sizes.position.x * 10, sizes.position.y * 23, 
+			phrases.startGame,
+			() -> 
+				print "SET ROOM TO LEVELS"
 
-			width: 550 
-			height: 500
+		rooms.menu.ui.settings = rooms.menu.ui.button sizes.position.x * 10, sizes.position.y * 35, 
+			phrases.settings,
+			() -> 
+				print "SET ROOM TO SETTINGS"
+				game.setRoom "settings"
 
-			focus: { ->
-				print "LOL"
-			}
-
-			tags: {"menu"}
-
-		}
-
-		game.rooms.menu.buttons.all\update!
+		rooms.menu.ui.all\update!
 
 love.load = ->
 
 	---------------- WINDOW ------------------
 	love.window.setTitle 'STAR SIMULATOR' 
 	love.graphics.setBackgroundColor 0, 0, 0
+	-- love.window.set
 	------------------------------------------
 
 	-- MoonScript requires
-	export game
+	export game, rooms, phrases, sizes
 
 	game = {
 		-- Aliases
@@ -92,32 +83,49 @@ love.load = ->
 		setFont:	love.graphics.setFont
 		text:		love.graphics.print
 		textf:		love.graphics.printf
-
-		-- Default room
-		room: "menu"
+		rectangle:  love.graphics.rectangle
+		font:  		love.graphics.setFont
+		color:  	love.graphics.setColor
 
 		-- Libraries
 		ui: require 'scripts/libs/ui'
 
-		window: {}
+		-- Rooms
+		room: "menu"
+		roomHistory: {'menu'}
+
+		setRoom: (room) ->
+			table.insert game.roomHistory, room
+			game.room = room
+
 
 		-- Rooms
 		rooms: 
 			menu: 
 				sky: angle:	love.math.random 0, 100
+
+		-- Languages
+		phrases: require 'scripts/phrases'	
+
+		-- Sizes
+		sizes: {}
 	}
+
+	sizes   = game.sizes
+	phrases = game.phrases.current
+	rooms   = game.rooms
 
 	game.images = {
 		sky:	 	game.image "resources/images/starsky.png"
 		logo:		game.image "resources/images/logomenu.png"
 	}
 
-	game.fonts = {
-		menu: 		game.font "resources/fonts/menu.ttf", 50
-	}
+	
 
 	-- Set size to default
 	defaultSize!
+
+	game.ui.update rooms.menu.ui.all	
 
 	return
 
@@ -130,7 +138,7 @@ love.update = (dt) ->
 		-- Rotate sky
 		game.rooms.menu.sky.angle += 0.001
 
-		game.ui.update game.rooms.menu.buttons.all
+		game.ui.update game.rooms.menu.ui.all
 
 	return
 
@@ -138,17 +146,22 @@ love.update = (dt) ->
 love.draw = ->
 	if game.room == "menu"
 		-- Set menu font
-		game.setFont game.fonts.menu
+		game.setFont game.fonts.logo
 
 		-- Draw sky
-		game.draw game.images.sky, game.window.width / 2, game.window.height / 2, game.rooms.menu.sky.angle, nil, nil, 1920, 1080
+		game.draw game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080
 
-		-- Draw logo
-		game.draw game.images.logo, game.rooms.menu.logo.x, game.rooms.menu.logo.y, nil, game.rooms.menu.logo.scale
-
-		game.ui.draw game.rooms.menu.buttons.all
+		game.ui.draw rooms.menu.ui.all
 
 	return
 
 -- Reload positions and sizes, when window changes size
 love.resize = defaultSize
+
+-- Bind UI events
+
+love.mousepressed = () ->
+	game.ui.mousepressed rooms.menu.ui.all
+
+love.mousereleased = ->
+	game.ui.mousereleased rooms.menu.ui.all

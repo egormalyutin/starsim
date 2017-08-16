@@ -13,40 +13,33 @@ defaultSize = function()
     love.window.setFullscreen(0)
     love.window.setMode(1366, 768)
   end
+  sizes.width, sizes.height = love.window.getMode()
+  sizes.position = { }
+  sizes.position.x = math.floor(sizes.width / 100)
+  sizes.position.y = math.floor(sizes.height / 100)
+  sizes.scale = sizes.width / 1366
   if game.room == "menu" then
-    game.window.width, game.window.height = love.window.getMode()
-    game.window.position = { }
-    game.window.position.x = game.window.width / 100
-    game.window.position.y = game.window.height / 100
-    game.window.scale = game.window.width / 1366
-    game.rooms.menu.logo = { }
-    game.rooms.menu.logo.x = game.window.position.x * 5
-    game.rooms.menu.logo.y = game.window.position.y * 5
-    game.rooms.menu.logo.scale = game.window.scale * 0.8
-    game.rooms.menu.buttons = { }
-    game.fonts.menu = game.font("resources/fonts/menu.ttf", math.floor(game.window.scale * 50))
-    game.rooms.menu.buttons.all = game.ui.Filter({
+    rooms.menu.ui = { }
+    game.fonts = {
+      buttonSize = math.floor(sizes.scale * 50),
+      logoSize = math.floor(sizes.scale * 100)
+    }
+    game.fonts.menu = love.graphics.newFont("resources/fonts/menu.ttf", game.fonts.buttonSize)
+    game.fonts.logo = love.graphics.newFont("resources/fonts/logo.ttf", game.fonts.logoSize)
+    rooms.menu.ui.all = game.ui.Filter({
       "menu"
     })
-    game.ui.destroy(game.rooms.menu.buttons.all)
-    game.rooms.menu.buttons.start = game.ui.Element({
-      draw = function(self)
-        return game.text("START GAME", 0, 0, nil)
-      end,
-      x = math.floor(game.window.position.x * 10),
-      y = math.floor(game.window.position.y * 20),
-      width = 550,
-      height = 500,
-      focus = {
-        function()
-          return print("LOL")
-        end
-      },
-      tags = {
-        "menu"
-      }
-    })
-    return game.rooms.menu.buttons.all:update()
+    game.ui.destroy(rooms.menu.ui.all)
+    rooms.menu.ui.button = require('scripts/rooms/menu/button')
+    rooms.menu.ui.logo = require('scripts/rooms/menu/logo')()
+    rooms.menu.ui.start = rooms.menu.ui.button(sizes.position.x * 10, sizes.position.y * 23, phrases.startGame, function()
+      return print("SET ROOM TO LEVELS")
+    end)
+    rooms.menu.ui.settings = rooms.menu.ui.button(sizes.position.x * 10, sizes.position.y * 35, phrases.settings, function()
+      print("SET ROOM TO SETTINGS")
+      return game.setRoom("settings")
+    end)
+    return rooms.menu.ui.all:update()
   end
 end
 love.load = function()
@@ -60,25 +53,37 @@ love.load = function()
     setFont = love.graphics.setFont,
     text = love.graphics.print,
     textf = love.graphics.printf,
-    room = "menu",
+    rectangle = love.graphics.rectangle,
+    font = love.graphics.setFont,
+    color = love.graphics.setColor,
     ui = require('scripts/libs/ui'),
-    window = { },
+    room = "menu",
+    roomHistory = {
+      'menu'
+    },
+    setRoom = function(room)
+      table.insert(game.roomHistory, room)
+      game.room = room
+    end,
     rooms = {
       menu = {
         sky = {
           angle = love.math.random(0, 100)
         }
       }
-    }
+    },
+    phrases = require('scripts/phrases'),
+    sizes = { }
   }
+  sizes = game.sizes
+  phrases = game.phrases.current
+  rooms = game.rooms
   game.images = {
     sky = game.image("resources/images/starsky.png"),
     logo = game.image("resources/images/logomenu.png")
   }
-  game.fonts = {
-    menu = game.font("resources/fonts/menu.ttf", 50)
-  }
   defaultSize()
+  game.ui.update(rooms.menu.ui.all)
 end
 love.update = function(dt)
   if game.pressed('lctrl') and game.pressed('lshift') and game.pressed('r') then
@@ -86,15 +91,20 @@ love.update = function(dt)
   end
   if game.room == "menu" then
     game.rooms.menu.sky.angle = game.rooms.menu.sky.angle + 0.001
-    game.ui.update(game.rooms.menu.buttons.all)
+    game.ui.update(game.rooms.menu.ui.all)
   end
 end
 love.draw = function()
   if game.room == "menu" then
-    game.setFont(game.fonts.menu)
-    game.draw(game.images.sky, game.window.width / 2, game.window.height / 2, game.rooms.menu.sky.angle, nil, nil, 1920, 1080)
-    game.draw(game.images.logo, game.rooms.menu.logo.x, game.rooms.menu.logo.y, nil, game.rooms.menu.logo.scale)
-    game.ui.draw(game.rooms.menu.buttons.all)
+    game.setFont(game.fonts.logo)
+    game.draw(game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080)
+    game.ui.draw(rooms.menu.ui.all)
   end
 end
 love.resize = defaultSize
+love.mousepressed = function()
+  return game.ui.mousepressed(rooms.menu.ui.all)
+end
+love.mousereleased = function()
+  return game.ui.mousereleased(rooms.menu.ui.all)
+end

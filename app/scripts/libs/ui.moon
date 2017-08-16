@@ -3,7 +3,7 @@ ui = {
 }
 
 -----------------------
--- EVENETS
+-- EVENTS
 -----------------------
 
 ui.draw = (elements = {}) ->
@@ -81,8 +81,10 @@ ui.Filter = class
 
 ui.Element = class
 	new: (s) =>
-		@drawFunction = s.draw or () ->
-		@drawf = @drawFunction
+		@drawFunction   = s.draw   or () ->
+		@updateFunction = s.update or () ->
+		@drawf   =   @drawFunction
+		@updatef = @updateFunction
 		@canvas = love.graphics.newCanvas!
 
 		@x  = s.x
@@ -95,7 +97,7 @@ ui.Element = class
 		@kx = s.kx
 		@ky = s.ky
 
-		@data = {}
+		@data = s.data or {}
 
 		@width  = s.width  or 0
 		@height = s.height or 0
@@ -104,85 +106,142 @@ ui.Element = class
 
 		table.insert ui.elements, @
 
-		@on =
-			mousepressed:       s.mousepressedbare  or s.pressedbare  or {}
-			mousepressedonce:   s.mousepressed      or s.pressed      or {}
-			mousereleased:      s.mousereleasedbare or s.releasedbare or {}
-			mousereleasedonce:  s.mousereleased     or s.released     or {}
-			mouseblur:          s.mouseblurbare     or s.blurbare     or {}
-			mousebluronce:      s.mouseblur         or s.blur         or {}
-			mousefocus:         s.mousefocusbare    or s.bare         or {}
-			mousefocusonce:     s.mousefocus        or s.focus        or {}
+		@on = {}
+
+		if type(s.mousepressedbare) == "function"
+			@on.mousepressedbare = { s.mousepressedbare }
+		else
+			@on.mousepressedbare = s.mousepressedbare
+
+		if type(s.mousepressed) == "function"
+			@on.mousepressed = { s.mousepressed }
+		else
+			@on.mousepressed = s.mousepressed
+
+		-----------
+
+		if type(s.mousereleasedbare) == "function"
+			@on.mousereleasedbare = { s.mousereleasedbare }
+		else
+			@on.mousereleasedbare = s.mousereleasedbare
+
+		if type(s.mousereleased) == "function"
+			@on.mousereleased = { s.mousereleased }
+		else
+			@on.mousereleased = s.mousereleased
+
+		-----------
+
+		if type(s.mousefocusbare) == "function"
+			@on.mousefocusbare = { s.mousefocusbare }
+		else
+			@on.mousefocusbare = s.mousefocusbare
+
+		if type(s.mousefocus) == "function"
+			@on.mousefocus = { s.mousefocus }
+		else
+			@on.mousefocus = s.mousefocus
+
+		-----------
+
+		if type(s.mouseblurbare) == "function"
+			@on.mouseblurbare = { s.mouseblurbare }
+		else
+			@on.mouseblurbare = s.mouseblurbare
+
+		if type(s.mouseblur) == "function"
+			@on.mouseblur = { s.mouseblur }
+		else
+			@on.mouseblur = s.mouseblur
 
 		@_focused = false
 		@_pressed = false
 
 	draw: =>
-		-- Blend mode
-    	love.graphics.setColor(255, 255, 255, 255)
-    	love.graphics.setBlendMode("alpha", "premultiplied")
-		
-		-- Drawing
+		-- Draw on canvas
 		love.graphics.setCanvas @canvas	
         love.graphics.clear!
 		@drawFunction!
 
-		-- Return to main canvas and blend mode
+		-- Set default canvas
 		love.graphics.setCanvas!
-		love.graphics.setBlendMode("alpha")
 
-		-- Draw
+		-- Draw canvas
+    	love.graphics.setColor(255, 255, 255, 255)
+    	love.graphics.setBlendMode("alpha", "premultiplied")
 		love.graphics.draw @canvas, @x, @y, @r, @sx, @sy, @ox, @oy, @kx, @ky
+
+		-- Set default blend mode
+		love.graphics.setBlendMode("alpha")
 
 	mousepressed: (x, y, button) =>
 		x = x or love.mouse.getX!
 		y = y or love.mouse.getY!
 
 		if (x > @x) and (x < (@x + @width)) and (y > @y) and (y < (@y + @height)) -- Check mouse
-			if @on.mousepressed ~= nil
-				for _, listener in pairs @on.mousepressed
-						listener x, y, button
+			if @on.mousepressedbare ~= nil
+				for _, listener in pairs @on.mousepressedbare
+						listener @, x, y, button
 
-			if (@on.mousepressedonce ~= nil) and (not @_pressed)
-				for _, listener in pairs @on.mousepressedonce
-						listener x, y, button	
-			@_pressed = true
+			if (@on.mousepressed ~= nil) and (not @_pressed)
+				for _, listener in pairs @on.mousepressed
+						listener @, x, y, button	
+			@\__setPressed true
 
 	mousereleased: (x, y, button) =>
 		x = x or love.mouse.getX!
 		y = y or love.mouse.getY!
 
 		if (x > @x) and (x < (@x + @width)) and (y > @y) and (y < (@y + @height)) -- Check mouse
-			if @on.mousereleased ~= nil
-				for _, listener in pairs @on.mousereleased
-						listener x, y, button
+			if @on.mousereleasedbare ~= nil
+				for _, listener in pairs @on.mousereleasedbare
+						listener @, x, y, button
 
-			if (@on.mousereleasedonce ~= nil) and (@_pressed)
-				for _, listener in pairs @on.mousereleasedonce
-						listener x, y, button	
-			@_pressed = false
+			if (@on.mousereleased ~= nil) and (@_pressed)
+				for _, listener in pairs @on.mousereleased
+						listener @, x, y, button	
+
+			@\__setPressed false
 
 	update: (x, y) =>
 		x = x or love.mouse.getX!
 		y = y or love.mouse.getY!
 
+		@updateFunction x, y
+
 		if (x > @x) and (x < (@x + @width)) and (y > @y) and (y < (@y + @height)) -- Check mouse
-			if @on.mousefocus ~= nil
+			if @on.mousefocusbare ~= nil
+				for _, listener in pairs @on.mousefocusbare
+						listener @, x, y, button
+
+			if (@on.mousefocus ~= nil) and (not @_focused)
 				for _, listener in pairs @on.mousefocus
-						listener x, y, button
+						listener @, x, y, button	
 
-			if (@on.mousefocusonce ~= nil) and (not @_focused)
-				for _, listener in pairs @on.mousefocusonce
-						listener x, y, button	
-			@_focused = true
+			@\__setFocused true
 		else
-			if @on.mouseblur ~= nil
-				for _, listener in pairs @on.mouseblur
-						listener x, y, button
+			if @on.mouseblurbare ~= nil
+				for _, listener in pairs @on.mouseblurbare
+						listener @, x, y, button
 
-			if (@on.mousebluronce ~= nil) and (@_focused)
-				for _, listener in pairs @on.mousebluronce
-						listener x, y, button	
-			@_focused = false
+			if (@on.mouseblur ~= nil) and (@_focused)
+				for _, listener in pairs @on.mouseblur
+						listener @, x, y, button	
+
+			@\__setFocused false
+
+	__setPressed: (value) =>
+		@_pressed = value
+		@pressed  = value
+		@press    = value
+		@release  = not value
+		@released = not value
+
+	__setFocused: (value) =>
+		@_focused = value
+		@focused  = value
+		@focus    = value
+		@blured   = not value
+		@blur     = not value
 
 return ui
