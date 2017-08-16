@@ -7,8 +7,6 @@ return function()
     end,
     x = sizes.position.x * 5,
     y = sizes.position.y * 5,
-    width = game.fonts.logoSize * 14,
-    height = game.fonts.logoSize,
     tags = {
       "menu"
     }

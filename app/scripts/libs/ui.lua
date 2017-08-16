@@ -200,6 +200,8 @@ do
       self._focused = value
       self.focused = value
       self.focus = value
+      self.hover = value
+      self.hovered = value
       self.blured = not value
       self.blur = not value
     end
@@ -221,6 +223,12 @@ do
       self.oy = s.oy
       self.kx = s.kx
       self.ky = s.ky
+      if not self.x then
+        self.x = 0
+      end
+      if not self.y then
+        self.y = 0
+      end
       self.data = s.data or { }
       self.width = s.width or 0
       self.height = s.height or 0

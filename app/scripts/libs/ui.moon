@@ -97,6 +97,9 @@ ui.Element = class
 		@kx = s.kx
 		@ky = s.ky
 
+		if not @x then @x = 0
+		if not @y then @y = 0
+
 		@data = s.data or {}
 
 		@width  = s.width  or 0
@@ -241,6 +244,8 @@ ui.Element = class
 		@_focused = value
 		@focused  = value
 		@focus    = value
+		@hover    = value
+		@hovered  = value
 		@blured   = not value
 		@blur     = not value
 

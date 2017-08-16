@@ -20,6 +20,10 @@ defaultSize = function()
   sizes.scale = sizes.width / 1366
   if game.room == "menu" then
     rooms.menu.ui = { }
+    rooms.menu.ui.station = { }
+    rooms.menu.ui.station.scale = sizes.scale / 2
+    rooms.menu.ui.station.x = sizes.width - (rooms.menu.ui.station.scale * 1211)
+    rooms.menu.ui.station.y = sizes.height - (rooms.menu.ui.station.scale * 427)
     game.fonts = {
       buttonSize = math.floor(sizes.scale * 50),
       logoSize = math.floor(sizes.scale * 100)
@@ -45,6 +49,7 @@ end
 love.load = function()
   love.window.setTitle('STAR SIMULATOR')
   love.graphics.setBackgroundColor(0, 0, 0)
+  love.window.setIcon(love.image.newImageData('resources/images/icon.png'))
   game = {
     pressed = love.keyboard.isDown,
     draw = love.graphics.draw,
@@ -80,7 +85,8 @@ love.load = function()
   rooms = game.rooms
   game.images = {
     sky = game.image("resources/images/starsky.png"),
-    logo = game.image("resources/images/logomenu.png")
+    logo = game.image("resources/images/logomenu.png"),
+    station = game.image("resources/images/station.png")
   }
   defaultSize()
   game.ui.update(rooms.menu.ui.all)
@@ -91,14 +97,15 @@ love.update = function(dt)
   end
   if game.room == "menu" then
     game.rooms.menu.sky.angle = game.rooms.menu.sky.angle + 0.001
-    game.ui.update(game.rooms.menu.ui.all)
+    return game.ui.update(game.rooms.menu.ui.all)
   end
 end
 love.draw = function()
   if game.room == "menu" then
     game.setFont(game.fonts.logo)
     game.draw(game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080)
-    game.ui.draw(rooms.menu.ui.all)
+    game.draw(game.images.station, rooms.menu.ui.station.x, rooms.menu.ui.station.y, nil, rooms.menu.ui.station.scale)
+    return game.ui.draw(rooms.menu.ui.all)
   end
 end
 love.resize = defaultSize

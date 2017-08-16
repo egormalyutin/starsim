@@ -30,6 +30,11 @@ defaultSize = () ->
 		
 		-- Create new boject and set buttons size
 		rooms.menu.ui = {}
+		rooms.menu.ui.station = {}
+
+		rooms.menu.ui.station.scale = sizes.scale  / 2
+		rooms.menu.ui.station.x     = sizes.width  - ( rooms.menu.ui.station.scale * 1211 )
+		rooms.menu.ui.station.y     = sizes.height - ( rooms.menu.ui.station.scale * 427 )
 
 		game.fonts = 
 			buttonSize: math.floor sizes.scale * 50
@@ -45,9 +50,8 @@ defaultSize = () ->
 		game.ui.destroy rooms.menu.ui.all
 
 		-- Load UI
-		rooms.menu.ui.button = require('scripts/rooms/menu/button')
-		rooms.menu.ui.logo  = require('scripts/rooms/menu/logo')()
-
+		rooms.menu.ui.button  = require('scripts/rooms/menu/button')
+		rooms.menu.ui.logo    = require('scripts/rooms/menu/logo')()
 
 		-- Create buttons
 		rooms.menu.ui.start = rooms.menu.ui.button sizes.position.x * 10, sizes.position.y * 23, 
@@ -61,15 +65,16 @@ defaultSize = () ->
 				print "SET ROOM TO SETTINGS"
 				game.setRoom "settings"
 
+
 		rooms.menu.ui.all\update!
 
 love.load = ->
 
-	---------------- WINDOW ------------------
+	------------------------------- WINDOW ---------------------------------
 	love.window.setTitle 'STAR SIMULATOR' 
 	love.graphics.setBackgroundColor 0, 0, 0
-	-- love.window.set
-	------------------------------------------
+	love.window.setIcon love.image.newImageData 'resources/images/icon.png'
+	------------------------------------------------------------------------
 
 	-- MoonScript requires
 	export game, rooms, phrases, sizes
@@ -118,6 +123,7 @@ love.load = ->
 	game.images = {
 		sky:	 	game.image "resources/images/starsky.png"
 		logo:		game.image "resources/images/logomenu.png"
+		station:	game.image "resources/images/station.png"
 	}
 
 	
@@ -129,7 +135,6 @@ love.load = ->
 
 	return
 
-
 love.update = (dt) ->
 	if game.pressed('lctrl') and game.pressed('lshift') and game.pressed('r')
 		game.room = "rooms"
@@ -140,8 +145,6 @@ love.update = (dt) ->
 
 		game.ui.update game.rooms.menu.ui.all
 
-	return
-
 
 love.draw = ->
 	if game.room == "menu"
@@ -151,9 +154,10 @@ love.draw = ->
 		-- Draw sky
 		game.draw game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080
 
-		game.ui.draw rooms.menu.ui.all
+		-- Draw station
+		game.draw game.images.station, rooms.menu.ui.station.x, rooms.menu.ui.station.y, nil, rooms.menu.ui.station.scale
 
-	return
+		game.ui.draw rooms.menu.ui.all
 
 -- Reload positions and sizes, when window changes size
 love.resize = defaultSize
