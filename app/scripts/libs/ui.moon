@@ -248,5 +248,7 @@ ui.Element = class
 		@hovered  = value
 		@blured   = not value
 		@blur     = not value
+		if not value
+			@\__setPressed false
 
 return ui

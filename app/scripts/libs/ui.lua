@@ -204,6 +204,9 @@ do
       self.hovered = value
       self.blured = not value
       self.blur = not value
+      if not value then
+        return self:__setPressed(false)
+      end
     end
   }
   _base_0.__index = _base_0

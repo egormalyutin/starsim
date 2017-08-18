@@ -26,47 +26,10 @@ defaultSize = () ->
 	-- Get abstract "scale" metric
 	sizes.scale = sizes.width / 1366
 
-	if game.room == "menu"
-		
-		-- Create new boject and set buttons size
-		rooms.menu.ui = {}
-		rooms.menu.ui.station = {}
+	if rooms[game.room]
+		if rooms[game.room].open
+			rooms[game.room].open game.room
 
-		rooms.menu.ui.station.scale = sizes.scale  / 2
-		rooms.menu.ui.station.x     = sizes.width  - ( rooms.menu.ui.station.scale * 1211 )
-		rooms.menu.ui.station.y     = sizes.height - ( rooms.menu.ui.station.scale * 427 )
-
-		game.fonts = 
-			buttonSize: math.floor sizes.scale * 50
-			logoSize: math.floor sizes.scale * 100
-
-		game.fonts.menu = love.graphics.newFont "resources/fonts/menu.ttf", game.fonts.buttonSize 
-		game.fonts.logo = love.graphics.newFont "resources/fonts/logo.ttf", game.fonts.logoSize
-		
-		-- Create buttons
-
-		rooms.menu.ui.all = game.ui.Filter { "menu" }
-
-		game.ui.destroy rooms.menu.ui.all
-
-		-- Load UI
-		rooms.menu.ui.button  = require('scripts/rooms/menu/button')
-		rooms.menu.ui.logo    = require('scripts/rooms/menu/logo')()
-
-		-- Create buttons
-		rooms.menu.ui.start = rooms.menu.ui.button sizes.position.x * 10, sizes.position.y * 23, 
-			phrases.startGame,
-			() -> 
-				print "SET ROOM TO LEVELS"
-
-		rooms.menu.ui.settings = rooms.menu.ui.button sizes.position.x * 10, sizes.position.y * 35, 
-			phrases.settings,
-			() -> 
-				print "SET ROOM TO SETTINGS"
-				game.setRoom "settings"
-
-
-		rooms.menu.ui.all\update!
 
 love.load = ->
 
@@ -91,23 +54,43 @@ love.load = ->
 		rectangle:  love.graphics.rectangle
 		font:  		love.graphics.setFont
 		color:  	love.graphics.setColor
+		play:		love.audio.play
+		pause:		love.audio.pause
+		audio:		love.audio.newSource
 
 		-- Libraries
-		ui: require 'scripts/libs/ui'
+		ui: 			require 'scripts/libs/ui'
+		Audio:			require 'scripts/audio'
 
 		-- Rooms
-		room: "menu"
+		room: "empty"
 		roomHistory: {'menu'}
 
 		setRoom: (room) ->
+			if rooms[game.room]
+				if rooms[game.room].close
+					rooms[game.room].close room
+
 			table.insert game.roomHistory, room
 			game.room = room
 
+			if rooms[room]
+				if rooms[room].open
+					rooms[room].open game.room
+
+			-- if game.o[room]
+				-- game.o[room]!
 
 		-- Rooms
 		rooms: 
 			menu: 
 				sky: angle:	love.math.random 0, 100
+				open:  require 'scripts/rooms/menu/open'
+				close: require 'scripts/rooms/menu/close'
+
+			settings:
+				open:  require 'scripts/rooms/settings/open'
+				close: require 'scripts/rooms/settings/close'
 
 		-- Languages
 		phrases: require 'scripts/phrases'	
@@ -120,34 +103,41 @@ love.load = ->
 	phrases = game.phrases.current
 	rooms   = game.rooms
 
+	game.audio  = {
+		menu:		game.Audio "resources/audio/menu.mp3"
+	}
+
 	game.images = {
 		sky:	 	game.image "resources/images/starsky.png"
 		logo:		game.image "resources/images/logomenu.png"
 		station:	game.image "resources/images/station.png"
 	}
 
-	
-
 	-- Set size to default
 	defaultSize!
 
-	game.ui.update rooms.menu.ui.all	
+	game.setRoom "menu"
+
+	game.ui.update rooms.ui.all	
 
 	return
 
 love.update = (dt) ->
 	if game.pressed('lctrl') and game.pressed('lshift') and game.pressed('r')
-		game.room = "rooms"
+		game.setRoom "menu"
 
-	if game.room == "menu"
+	if (game.room == "menu") or (game.room == "settings")
 		-- Rotate sky
 		game.rooms.menu.sky.angle += 0.001
 
-		game.ui.update game.rooms.menu.ui.all
+		game.ui.update game.rooms.ui.all
+	dev_enable()
+	lovebird.update!
+	dev_disable()
 
 
 love.draw = ->
-	if game.room == "menu"
+	if (game.room == "menu") or (game.room == "settings")		
 		-- Set menu font
 		game.setFont game.fonts.logo
 
@@ -155,9 +145,11 @@ love.draw = ->
 		game.draw game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080
 
 		-- Draw station
-		game.draw game.images.station, rooms.menu.ui.station.x, rooms.menu.ui.station.y, nil, rooms.menu.ui.station.scale
+		game.draw game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale
 
-		game.ui.draw rooms.menu.ui.all
+		game.ui.draw rooms.ui.all
+
+
 
 -- Reload positions and sizes, when window changes size
 love.resize = defaultSize
@@ -165,7 +157,7 @@ love.resize = defaultSize
 -- Bind UI events
 
 love.mousepressed = () ->
-	game.ui.mousepressed rooms.menu.ui.all
+	game.ui.mousepressed rooms.ui.all
 
 love.mousereleased = ->
-	game.ui.mousereleased rooms.menu.ui.all
+	game.ui.mousereleased rooms.ui.all
