@@ -28,7 +28,7 @@ ui.mousereleased = function(elements, x, y, button)
     element:mousereleased(x, y, button)
   end
 end
-ui.update = function(elements, x, y)
+ui.update = function(elements, x, y, dt)
   if elements == nil then
     elements = { }
   end
@@ -115,15 +115,19 @@ end
 do
   local _class_0
   local _base_0 = {
-    draw = function(self)
+    redraw = function(self)
       love.graphics.setCanvas(self.canvas)
       love.graphics.clear()
       self:drawFunction()
-      love.graphics.setCanvas()
+      return love.graphics.setCanvas()
+    end,
+    draw = function(self)
+      love.graphics.setCanvas(self.output)
       love.graphics.setColor(255, 255, 255, 255)
       love.graphics.setBlendMode("alpha", "premultiplied")
       love.graphics.draw(self.canvas, self.x, self.y, self.r, self.sx, self.sy, self.ox, self.oy, self.kx, self.ky)
-      return love.graphics.setBlendMode("alpha")
+      love.graphics.setBlendMode("alpha")
+      return love.graphics.setCanvas()
     end,
     mousepressed = function(self, x, y, button)
       x = x or love.mouse.getX()
@@ -296,6 +300,10 @@ do
       end
       self._focused = false
       self._pressed = false
+      love.graphics.setCanvas(self.canvas)
+      love.graphics.clear()
+      self:drawFunction()
+      return love.graphics.setCanvas()
     end,
     __base = _base_0,
     __name = "Element"

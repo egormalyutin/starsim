@@ -5,6 +5,9 @@ phrases =  {
 				settings:	 "SETTINGS"
 				backward:	 "BACKWARD"
 				musicVolume: "MUSIC VOLUME"
+				language:	 "ENGLISH"
+				setLanguage: "LANGUAGE: "
+				isLang:		 true
 
 	russian:
 				name:      	 "STAR SIMULATOR"
@@ -12,6 +15,9 @@ phrases =  {
 				settings:	 "НАСТРОЙКИ"
 				backward:	 "НАЗАД"
 				musicVolume: "ГРОМКОСТЬ МУЗЫКИ"
+				language:    "РУССКИЙ"
+				setLanguage: "ЯЗЫК: "
+				isLang:       true
 } 
 
 phrases.current = phrases.russian

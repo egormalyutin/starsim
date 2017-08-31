@@ -15,11 +15,17 @@ return function()
   })
   game.ui.destroy(rooms.ui.all)
   rooms.ui.button = require('scripts/ui/button')
-  rooms.ui.slider = require('scripts/ui/slider')
   rooms.ui.logo = require('scripts/ui/logo')()
-  rooms.ui.start = rooms.ui.button(sizes.position.x * 10, sizes.position.y * 23, phrases.backward, function()
+  rooms.ui.lang = require('scripts/ui/lang')
+  local x = sizes.position.x * 10
+  local y = sizes.position.y * 23
+  local py = sizes.position.y * 12
+  rooms.ui.backward = rooms.ui.lang(x, y, function()
     return game.setRoom(game.roomHistory[#game.roomHistory - 1])
   end)
-  rooms.ui.slide = rooms.ui.slider(10, 5, nil)
+  rooms.ui.backward = rooms.ui.button(x, y + py, phrases.backward, function()
+    return game.setRoom(game.roomHistory[#game.roomHistory - 1])
+  end)
+  game.audio.menu:play()
   return rooms.ui.all:update()
 end

@@ -25,9 +25,6 @@ defaultSize = function()
   end
 end
 love.load = function()
-  love.window.setTitle('STAR SIMULATOR')
-  love.graphics.setBackgroundColor(0, 0, 0)
-  love.window.setIcon(love.image.newImageData('resources/images/icon.png'))
   game = {
     pressed = love.keyboard.isDown,
     draw = love.graphics.draw,
@@ -81,6 +78,9 @@ love.load = function()
   sizes = game.sizes
   phrases = game.phrases.current
   rooms = game.rooms
+  love.window.setTitle(phrases.name)
+  love.graphics.setBackgroundColor(0, 0, 0)
+  love.window.setIcon(love.image.newImageData('resources/images/icon.png'))
   game.audio = {
     menu = game.Audio("resources/audio/menu.mp3")
   }
@@ -91,7 +91,7 @@ love.load = function()
   }
   defaultSize()
   game.setRoom("menu")
-  game.ui.update(rooms.ui.all)
+  game.ui.update(rooms.ui.all, nil, nil, 0)
 end
 love.update = function(dt)
   if game.pressed('lctrl') and game.pressed('lshift') and game.pressed('r') then
@@ -99,7 +99,7 @@ love.update = function(dt)
   end
   if (game.room == "menu") or (game.room == "settings") then
     game.rooms.menu.sky.angle = game.rooms.menu.sky.angle + 0.001
-    game.ui.update(game.rooms.ui.all)
+    game.ui.update(game.rooms.ui.all, nil, nil, dt)
   end
   dev_enable()
   lovebird.update()

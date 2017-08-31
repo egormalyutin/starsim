@@ -31,6 +31,12 @@ Audio = class
 	seek: (pos, unit) =>
 		@source\seek pos, unit
 
+	volume: (proc) =>
+		if proc
+			@source\setVolume 0.01 * proc
+		else
+			return @source\getVolume!
+
 	clone: (pure) =>
 		if pure then return @source\clone!
 		return Audio @source

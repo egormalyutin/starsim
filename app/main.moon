@@ -32,13 +32,6 @@ defaultSize = () ->
 
 
 love.load = ->
-
-	------------------------------- WINDOW ---------------------------------
-	love.window.setTitle 'STAR SIMULATOR' 
-	love.graphics.setBackgroundColor 0, 0, 0
-	love.window.setIcon love.image.newImageData 'resources/images/icon.png'
-	------------------------------------------------------------------------
-
 	-- MoonScript requires
 	export game, rooms, phrases, sizes
 
@@ -103,6 +96,12 @@ love.load = ->
 	phrases = game.phrases.current
 	rooms   = game.rooms
 
+	------------------------------- WINDOW ---------------------------------
+	love.window.setTitle phrases.name
+	love.graphics.setBackgroundColor 0, 0, 0
+	love.window.setIcon love.image.newImageData 'resources/images/icon.png'
+	------------------------------------------------------------------------
+
 	game.audio  = {
 		menu:		game.Audio "resources/audio/menu.mp3"
 	}
@@ -118,7 +117,7 @@ love.load = ->
 
 	game.setRoom "menu"
 
-	game.ui.update rooms.ui.all	
+	game.ui.update rooms.ui.all, nil, nil, 0
 
 	return
 
@@ -130,11 +129,10 @@ love.update = (dt) ->
 		-- Rotate sky
 		game.rooms.menu.sky.angle += 0.001
 
-		game.ui.update game.rooms.ui.all
+		game.ui.update game.rooms.ui.all, nil, nil, dt
 	dev_enable()
 	lovebird.update!
 	dev_disable()
-
 
 love.draw = ->
 	if (game.room == "menu") or (game.room == "settings")		
@@ -148,7 +146,6 @@ love.draw = ->
 		game.draw game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale
 
 		game.ui.draw rooms.ui.all
-
 
 
 -- Reload positions and sizes, when window changes size

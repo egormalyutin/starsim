@@ -16,12 +16,13 @@ return function(last)
   game.ui.destroy(rooms.ui.all)
   rooms.ui.button = require('scripts/ui/button')
   rooms.ui.logo = require('scripts/ui/logo')()
-  rooms.ui.start = rooms.ui.button(sizes.position.x * 10, sizes.position.y * 23, phrases.startGame, function() end)
-  rooms.ui.settings = rooms.ui.button(sizes.position.x * 10, sizes.position.y * 35, phrases.settings, function()
+  local x = sizes.position.x * 10
+  local y = sizes.position.y * 23
+  local py = sizes.position.y * 12
+  rooms.ui.start = rooms.ui.button(x, y, phrases.startGame, function() end)
+  rooms.ui.settings = rooms.ui.button(x, y + py, phrases.settings, function()
     return game.setRoom("settings")
   end)
-  if last ~= "settings" then
-    game.audio.menu:play()
-  end
+  game.audio.menu:play()
   return rooms.ui.all:update()
 end

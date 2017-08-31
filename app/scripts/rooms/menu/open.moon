@@ -23,16 +23,19 @@ return (last) ->
 	rooms.ui.button  = require('scripts/ui/button')
 	rooms.ui.logo    = require('scripts/ui/logo')()
 
-	rooms.ui.start = rooms.ui.button sizes.position.x * 10, sizes.position.y * 23, 
+	x  = sizes.position.x * 10
+	y  = sizes.position.y * 23
+	py = sizes.position.y * 12
+
+	rooms.ui.start = rooms.ui.button x, y, 
 		phrases.startGame,
 		() -> 
 
-	rooms.ui.settings = rooms.ui.button sizes.position.x * 10, sizes.position.y * 35, 
+	rooms.ui.settings = rooms.ui.button x, y + py, 
 		phrases.settings,
 		() -> 
 			game.setRoom "settings"
 
-	if last ~= "settings"
-		game.audio.menu\play!
+	game.audio.menu\play!
 
 	rooms.ui.all\update!

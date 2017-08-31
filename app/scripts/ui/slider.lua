@@ -1,6 +1,7 @@
 return function(x, y, click)
   return game.ui.Element({
     draw = function(self)
+      game.setFont(game.fonts.menu)
       love.graphics.setLineWidth(10)
       love.graphics.setLineStyle("rough")
       love.graphics.line(20, self.height / 3 * 2, self.width, self.height / 3 * 2)
@@ -11,6 +12,7 @@ return function(x, y, click)
       if (self.hover) and (self.pressed) and (x > 20) and (x < self.width + 40) then
         self.data.active = x - 10
         self.data.text = math.floor((x - 20) / (self.width + 20) * 100) .. "%"
+        return self:redraw()
       end
     end,
     x = x,

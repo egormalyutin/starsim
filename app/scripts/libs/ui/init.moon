@@ -2,6 +2,11 @@ ui = {
 	elements: {}
 }
 
+hc = require 'HC'
+
+ui.mouse = hc.circle(400,300,20)
+ui.mouse\moveTo(love.mouse.getPosition())
+
 -----------------------
 -- EVENTS
 -----------------------
@@ -21,7 +26,7 @@ ui.mousereleased = (elements = {}, x, y, button) ->
 	for name, element in pairs args
 		element\mousereleased x, y, button
 
-ui.update = (elements = {}, x, y) ->
+ui.update = (elements = {}, x, y, dt) ->
 	args = ui.__pipeArray elements
 	for name, element in pairs args
 		element\update x, y
@@ -160,22 +165,40 @@ ui.Element = class
 		@_focused = false
 		@_pressed = false
 
-	draw: =>
 		-- Draw on canvas
 		love.graphics.setCanvas @canvas	
-        love.graphics.clear!
+		love.graphics.clear!
 		@drawFunction!
-
 		-- Set default canvas
 		love.graphics.setCanvas!
 
+	redraw: =>
+		-- Draw on canvas
+		love.graphics.setCanvas @canvas	
+		love.graphics.clear!
+		@drawFunction!
+		-- Set default canvas
+		love.graphics.setCanvas!
+
+	draw: =>
+		------------------- NOW USING "REDRAW"
+		-- -- Draw on canvas
+		-- love.graphics.setCanvas @canvas	
+  		-- love.graphics.clear!
+		-- @drawFunction!
+
+		-- -- Set default canvas
+		-- love.graphics.setCanvas!
+
 		-- Draw canvas
+		love.graphics.setCanvas @output
     	love.graphics.setColor(255, 255, 255, 255)
     	love.graphics.setBlendMode("alpha", "premultiplied")
 		love.graphics.draw @canvas, @x, @y, @r, @sx, @sy, @ox, @oy, @kx, @ky
 
 		-- Set default blend mode
 		love.graphics.setBlendMode("alpha")
+		love.graphics.setCanvas!
 
 	mousepressed: (x, y, button) =>
 		x = x or love.mouse.getX!

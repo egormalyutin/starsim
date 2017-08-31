@@ -3,6 +3,7 @@
 return (x, y, click) ->
 	game.ui.Element {
 		draw: =>
+			game.setFont game.fonts.menu
 			love.graphics.setLineWidth 10
 			love.graphics.setLineStyle "rough"
 			love.graphics.line 20, @height / 3 * 2, @width, @height / 3 * 2 
@@ -16,6 +17,7 @@ return (x, y, click) ->
 			if (@hover) and (@pressed) and (x > 20) and (x < @width + 40)
 					@data.active = x - 10
 					@data.text   = math.floor((x - 20) / (@width + 20) * 100) .. "%"
+					@redraw!
 
 		x: x
 		y: y

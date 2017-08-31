@@ -19,15 +19,26 @@ return () ->
 	game.ui.destroy rooms.ui.all
 
 	rooms.ui.button  = require('scripts/ui/button')
-	rooms.ui.slider  = require('scripts/ui/slider')
+	-- rooms.ui.slider  = require('scripts/ui/slider')
 	rooms.ui.logo    = require('scripts/ui/logo')()
+	rooms.ui.lang    = require('scripts/ui/lang')
 	-- Create buttons
 
-	rooms.ui.start = rooms.ui.button sizes.position.x * 10, sizes.position.y * 23, 
+	x  = sizes.position.x * 10
+	y  = sizes.position.y * 23
+	py = sizes.position.y * 12
+
+	rooms.ui.backward = rooms.ui.lang x, y, 
+		() -> 
+			game.setRoom game.roomHistory[#game.roomHistory - 1]
+
+	rooms.ui.backward = rooms.ui.button x, y + py, 
 		phrases.backward,
 		() -> 
 			game.setRoom game.roomHistory[#game.roomHistory - 1]
 
-	rooms.ui.slide = rooms.ui.slider 10, 5, nil
+	-- rooms.ui.slide = rooms.ui.slider 10, 5, nil
 
+	game.audio.menu\play!
+	
 	rooms.ui.all\update!

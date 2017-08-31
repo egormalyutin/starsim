@@ -28,6 +28,13 @@ do
     seek = function(self, pos, unit)
       return self.source:seek(pos, unit)
     end,
+    volume = function(self, proc)
+      if proc then
+        return self.source:setVolume(0.01 * proc)
+      else
+        return self.source:getVolume()
+      end
+    end,
     clone = function(self, pure)
       if pure then
         return self.source:clone()
