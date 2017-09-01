@@ -2,8 +2,8 @@ local button
 button = function(x, y, text, click)
   local res = game.ui.Element({
     draw = function(self)
-      if self.hover then
-        game.color(255, 255, 255, 190)
+      if self.focused then
+        game.color(255, 255, 255, 50)
       else
         game.color(255, 255, 255)
       end
@@ -17,8 +17,10 @@ button = function(x, y, text, click)
       "menu"
     }
   })
-  res.width = game.fonts.menu:getWidth(text)
-  res.height = game.fonts.menu:getHeight()
+  res:setWidth(game.fonts.menu:getWidth(text))
+  res:setHeight(game.fonts.menu:getHeight())
+  res:setRotation(math.pi / 10)
+  res:__reshape()
   return res
 end
 return button

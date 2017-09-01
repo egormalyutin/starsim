@@ -1,6 +1,11 @@
 local ui = {
   elements = { }
 }
+local _NAME = (...)
+local hc = require(_NAME .. '.HC')
+ui.mouse = hc.circle(0, 0, 1)
+ui.mouse:moveTo(love.mouse.getPosition())
+ui.obj = hc.rectangle(100, 100, 200, 200)
 ui.draw = function(elements)
   if elements == nil then
     elements = { }
@@ -32,6 +37,7 @@ ui.update = function(elements, x, y, dt)
   if elements == nil then
     elements = { }
   end
+  ui.mouse:moveTo(love.mouse.getPosition())
   local args = ui.__pipeArray(elements)
   for name, element in pairs(args) do
     element:update(x, y)
@@ -84,6 +90,14 @@ ui.__filter = function(patterns)
   end
   return res
 end
+ui.__checkMouse = function(elem)
+  for shape, delta in pairs(hc.collisions(ui.mouse)) do
+    if shape == elem._shape then
+      return true
+    end
+  end
+  return false
+end
 do
   local _class_0
   local _base_0 = {
@@ -125,14 +139,135 @@ do
       love.graphics.setCanvas(self.output)
       love.graphics.setColor(255, 255, 255, 255)
       love.graphics.setBlendMode("alpha", "premultiplied")
-      love.graphics.draw(self.canvas, self.x, self.y, self.r, self.sx, self.sy, self.ox, self.oy, self.kx, self.ky)
+      love.graphics.draw(self.canvas, self._x, self._y, self._r, self._sx, self._sy, self._ox, self._oy, self._kx, self._ky)
       love.graphics.setBlendMode("alpha")
       return love.graphics.setCanvas()
+    end,
+    __reshape = function(self)
+      self._shape = hc.rectangle(self._x, self._y, self._width, self._height)
+      return self._shape:setRotation(self:getRotation(), self._x + self:getOffsetX(), self._y + self:getOffsetY())
+    end,
+    setX = function(self, x)
+      self._x = x
+      self:__reshape()
+    end,
+    getX = function(self)
+      return self._x
+    end,
+    setY = function(self, y)
+      self._y = y
+      self:__reshape()
+    end,
+    getY = function(self)
+      return self._y
+    end,
+    setPosition = function(self, x, y)
+      self:setX(x or self:getX())
+      self:setY(y or self:getY())
+      self:__reshape()
+    end,
+    getPosition = function(self)
+      return self:getX(), self:getY()
+    end,
+    setWidth = function(self, w)
+      self._width = w or 1
+      self:__reshape()
+    end,
+    getWidth = function(self)
+      return self._width
+    end,
+    setHeight = function(self, h)
+      self._height = h or 1
+      self:__reshape()
+    end,
+    getHeight = function(self)
+      return self._height
+    end,
+    setSize = function(self, w, h)
+      self:setWidth(w or self:getWidth())
+      self:setHeight(h or self:getHeight())
+      self:__reshape()
+    end,
+    getSize = function(self)
+      return self:getWidth(), self:getHeight()
+    end,
+    setRotation = function(self, r)
+      self._r = r
+      return self:__reshape()
+    end,
+    getRotation = function(self)
+      return self._r
+    end,
+    setScaleX = function(self, x)
+      self._sx = x
+      return self:__reshape()
+    end,
+    getScaleX = function(self)
+      return self._sx
+    end,
+    setScaleY = function(self, y)
+      self._sy = y
+      return self:__reshape()
+    end,
+    getScaleY = function(self)
+      return self._sy
+    end,
+    setScale = function(self, x, y)
+      self:setScaleX(x or self:getScaleX())
+      self:setScaleY(y or self:getScaleY())
+      self:__reshape()
+    end,
+    getScale = function(self)
+      return self:getScaleX(), self:getScaleY()
+    end,
+    setOffsetX = function(self, x)
+      self._ox = x
+      return self:__reshape()
+    end,
+    getOffsetX = function(self)
+      return self._ox
+    end,
+    setOffsetY = function(self, y)
+      self._oy = y
+      return self:__reshape()
+    end,
+    getOffsetY = function(self)
+      return self._oy
+    end,
+    setOffset = function(self, x, y)
+      self:setOffsetX(x or self:getOffsetX())
+      self:setOffsetY(y or self:getOffsetY())
+      self:__reshape()
+    end,
+    getOffset = function(self)
+      return self:getOffsetX(), self:getOffsetY()
+    end,
+    setShearingX = function(self, x)
+      self._kx = x
+      return self:__reshape()
+    end,
+    getShearingX = function(self)
+      return self._kx
+    end,
+    setShearingY = function(self, y)
+      self._ky = y
+      return self:__reshape()
+    end,
+    getShearingY = function(self)
+      return self._ky
+    end,
+    setShearing = function(self, x, y)
+      self:setShearingX(x or self:getShearingX())
+      self:setShearingY(y or self:getShearingY())
+      self:__reshape()
+    end,
+    getShearing = function(self)
+      return self:getShearingX(), self:getShearingY()
     end,
     mousepressed = function(self, x, y, button)
       x = x or love.mouse.getX()
       y = y or love.mouse.getY()
-      if (x > self.x) and (x < (self.x + self.width)) and (y > self.y) and (y < (self.y + self.height)) then
+      if ui.__checkMouse(self) then
         if self.on.mousepressedbare ~= nil then
           for _, listener in pairs(self.on.mousepressedbare) do
             listener(self, x, y, button)
@@ -149,7 +284,7 @@ do
     mousereleased = function(self, x, y, button)
       x = x or love.mouse.getX()
       y = y or love.mouse.getY()
-      if (x > self.x) and (x < (self.x + self.width)) and (y > self.y) and (y < (self.y + self.height)) then
+      if ui.__checkMouse(self) then
         if self.on.mousereleasedbare ~= nil then
           for _, listener in pairs(self.on.mousereleasedbare) do
             listener(self, x, y, button)
@@ -167,7 +302,7 @@ do
       x = x or love.mouse.getX()
       y = y or love.mouse.getY()
       self:updateFunction(x, y)
-      if (x > self.x) and (x < (self.x + self.width)) and (y > self.y) and (y < (self.y + self.height)) then
+      if ui.__checkMouse(self) then
         if self.on.mousefocusbare ~= nil then
           for _, listener in pairs(self.on.mousefocusbare) do
             listener(self, x, y, button)
@@ -197,8 +332,8 @@ do
       self._pressed = value
       self.pressed = value
       self.press = value
-      self.release = not value
-      self.released = not value
+      self._release = not value
+      self._released = not value
     end,
     __setFocused = function(self, value)
       self._focused = value
@@ -221,26 +356,28 @@ do
       self.drawf = self.drawFunction
       self.updatef = self.updateFunction
       self.canvas = love.graphics.newCanvas()
-      self.x = s.x
-      self.y = s.y
-      self.r = s.r
-      self.sx = s.sx
-      self.sy = s.sy
-      self.ox = s.ox
-      self.oy = s.oy
-      self.kx = s.kx
-      self.ky = s.ky
-      if not self.x then
-        self.x = 0
+      self._x = s.x or 0
+      self._y = s.y or 0
+      self._r = s.r or 0
+      self._sx = s.sx or 1
+      self._sy = s.sy or 1
+      self._ox = s.ox or 0
+      self._oy = s.oy or 0
+      self._kx = s.kx or 0
+      self._ky = s.ky or 0
+      if not self._x then
+        self._x = 0
       end
-      if not self.y then
-        self.y = 0
+      if not self._y then
+        self._y = 0
       end
       self.data = s.data or { }
-      self.width = s.width or 0
-      self.height = s.height or 0
+      self._width = s.width or 1
+      self._height = s.height or 1
       self.tags = s.tags or { }
       table.insert(ui.elements, self)
+      self._shape = hc.rectangle(self._x, self._y, self._width, self._height)
+      self:__reshape()
       self.on = { }
       if type(s.mousepressedbare) == "function" then
         self.on.mousepressedbare = {

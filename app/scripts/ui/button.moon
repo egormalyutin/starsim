@@ -4,12 +4,13 @@ button = (x, y, text, click) ->
 	res = game.ui.Element {
 		draw: =>
 			-- Draw text of buttons
-			if @hover
-				game.color 255, 255, 255, 190
+			if @focused
+				game.color 255, 255, 255, 50
 			else
 				game.color 255, 255, 255
 			game.font game.fonts.menu
 			game.text text, 0, 0
+
 
 		x: x
 		y: y
@@ -19,8 +20,10 @@ button = (x, y, text, click) ->
 		tags: {"menu"}
 	}
 
-	res.width  = game.fonts.menu\getWidth text
-	res.height = game.fonts.menu\getHeight!
+	res\setWidth  game.fonts.menu\getWidth text
+	res\setHeight game.fonts.menu\getHeight!
+	res\setRotation math.pi /10
+	res\__reshape!
 
 	res
 
