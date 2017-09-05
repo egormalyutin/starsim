@@ -3,7 +3,7 @@ dev_enable = function() end
 local dev_disable
 dev_disable = function() end
 dev_enable()
-local lovebird = require('scripts/libs/lovebird')
+local lovebird = require('scripts.libs.lovebird')
 dev_disable()
 local defaultSize
 defaultSize = function()
@@ -40,6 +40,7 @@ love.load = function()
     pause = love.audio.pause,
     audio = love.audio.newSource,
     ui = require('scripts/libs/ui'),
+    binser = require('scripts/libs/binser'),
     Audio = require('scripts/audio'),
     room = "empty",
     roomHistory = {
@@ -70,9 +71,39 @@ love.load = function()
       settings = {
         open = require('scripts/rooms/settings/open'),
         close = require('scripts/rooms/settings/close')
+      },
+      play = {
+        open = function() end,
+        close = function() end
       }
     },
+    startGame = require('scripts/startGame'),
     phrases = require('scripts/phrases'),
+    getLanguage = function(mas)
+      if mas == nil then
+        mas = { }
+      end
+      local name
+      for name, value in pairs(game.phrases) do
+        if value == phrases then
+          name = lang
+        end
+      end
+      if mas[name] then
+        return mas[name]
+      end
+      return name
+    end,
+    setLanguage = function(lang, room)
+      game.phrases.current = lang
+      love.graphics.clear()
+      local w = game.fonts.menu:getWidth(phrases.wait)
+      local h = game.fonts.menu:getHeight()
+      local x = (sizes.width / 2) - (w / 2)
+      local y = (sizes.height / 2) - (h / 2)
+      game.text(phrases.wait, x, y)
+      return love.event.quit('restart')
+    end,
     sizes = { }
   }
   sizes = game.sizes
@@ -90,7 +121,7 @@ love.load = function()
     station = game.image("resources/images/station.png")
   }
   defaultSize()
-  game.setRoom("menu")
+  game.setRoom(room or "menu")
   game.ui.update(rooms.ui.all, nil, nil, 0)
 end
 love.update = function(dt)
@@ -99,7 +130,10 @@ love.update = function(dt)
   end
   if (game.room == "menu") or (game.room == "settings") then
     game.rooms.menu.sky.angle = game.rooms.menu.sky.angle + 0.001
-    game.ui.update(game.rooms.ui.all, nil, nil, dt)
+    game.ui.update(game.rooms.ui.all)
+  end
+  if (game.room == "play") then
+    game.playing.update(dt)
   end
   dev_enable()
   lovebird.update()
@@ -110,7 +144,10 @@ love.draw = function()
     game.setFont(game.fonts.logo)
     game.draw(game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080)
     game.draw(game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale)
-    return game.ui.draw(rooms.ui.all)
+    game.ui.draw(rooms.ui.all)
+  end
+  if (game.room == "play") then
+    return game.playing.draw()
   end
 end
 love.resize = defaultSize

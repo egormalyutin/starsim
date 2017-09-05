@@ -2,8 +2,9 @@ dev_enable = () ->
 dev_disable = () ->
 
 dev_enable()
-lovebird	= require 'scripts/libs/lovebird'
+lovebird	= require 'scripts.libs.lovebird'
 dev_disable()
+
 
 defaultSize = () ->
 	love.window.setFullscreen 1
@@ -31,7 +32,8 @@ defaultSize = () ->
 			rooms[game.room].open game.room
 
 
-love.load = ->
+love.load = () ->
+
 	-- MoonScript requires
 	export game, rooms, phrases, sizes
 
@@ -53,6 +55,7 @@ love.load = ->
 
 		-- Libraries
 		ui: 			require 'scripts/libs/ui'
+		binser:			require 'scripts/libs/binser'
 		Audio:			require 'scripts/audio'
 
 		-- Rooms
@@ -74,7 +77,6 @@ love.load = ->
 			-- if game.o[room]
 				-- game.o[room]!
 
-		-- Rooms
 		rooms: 
 			menu: 
 				sky: angle:	love.math.random 0, 100
@@ -85,8 +87,31 @@ love.load = ->
 				open:  require 'scripts/rooms/settings/open'
 				close: require 'scripts/rooms/settings/close'
 
+			play: 
+				open:  () ->
+				close: () ->
+
+		startGame: require 'scripts/startGame'
+
 		-- Languages
 		phrases: require 'scripts/phrases'	
+
+		getLanguage: (mas = {}) ->
+			name = lang for name, value in pairs game.phrases when value == phrases
+			if mas[name] then return mas[name]
+			return name
+
+		setLanguage: (lang, room) ->
+			game.phrases.current = lang
+			love.graphics.clear!
+			w = game.fonts.menu\getWidth phrases.wait
+			h = game.fonts.menu\getHeight!
+
+			x = (sizes.width  / 2) - (w / 2)
+			y = (sizes.height / 2) - (h / 2)
+
+			game.text phrases.wait, x, y
+			love.event.quit 'restart'
 
 		-- Sizes
 		sizes: {}
@@ -115,7 +140,7 @@ love.load = ->
 	-- Set size to default
 	defaultSize!
 
-	game.setRoom "menu"
+	game.setRoom room or "menu"
 
 	game.ui.update rooms.ui.all, nil, nil, 0
 
@@ -129,7 +154,12 @@ love.update = (dt) ->
 		-- Rotate sky
 		game.rooms.menu.sky.angle += 0.001
 
-		game.ui.update game.rooms.ui.all, nil, nil, dt
+		game.ui.update game.rooms.ui.all
+
+
+	if (game.room == "play")
+		game.playing.update dt
+
 	dev_enable()
 	lovebird.update!
 	dev_disable()
@@ -146,6 +176,9 @@ love.draw = ->
 		game.draw game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale
 
 		game.ui.draw rooms.ui.all
+
+	if (game.room == "play")
+		game.playing.draw!
 
 
 -- Reload positions and sizes, when window changes size

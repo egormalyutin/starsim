@@ -4,7 +4,7 @@ ui = {
 
 _NAME = (...)
 
-hc = require _NAME .. '.HC'
+hc     = require _NAME .. '.HC'
 
 ui.mouse = hc.circle 0,0,1
 ui.mouse\moveTo(love.mouse.getPosition())
@@ -76,7 +76,7 @@ ui.__filter = (patterns) ->
 
 ui.__checkMouse = (elem) ->
 	for shape, delta in pairs hc.collisions ui.mouse
-		if shape == elem._shape
+		if shape == elem.shape
 			return true
 
 	false
@@ -104,33 +104,34 @@ ui.Element = class
 		@updatef = @updateFunction
 		@canvas = love.graphics.newCanvas!
 
-		@_x  = s.x  or 0
-		@_y  = s.y  or 0
-		@_r  = s.r  or 0
-		@_sx = s.sx or 1
-		@_sy = s.sy or 1
-		@_ox = s.ox or 0
-		@_oy = s.oy or 0
-		@_kx = s.kx or 0
-		@_ky = s.ky or 0
+		@x  = s.x  or 0
+		@y  = s.y  or 0
+		@r  = s.r  or 0
+		@sx = s.sx or 1
+		@sy = s.sy or 1
+		@ox = s.ox or 0
+		@oy = s.oy or 0
+		@kx = s.kx or 0
+		@ky = s.ky or 0
 
-		if not @_x then @_x = 0
-		if not @_y then @_y = 0
+		if not @x then @x = 0
+		if not @y then @y = 0
 
 		@data = s.data or {}
 
-		@_width  = s.width  or 1
-		@_height = s.height or 1
+		@width  = s.width  or 1
+		@height = s.height or 1
 
 		@tags   = s.tags or {}
 
 		table.insert ui.elements, @
 
-		@_shape = hc.rectangle @_x, @_y, @_width, @_height
-
-		@\__reshape!
+		@\reshape!
 
 		@on = {}
+
+		@_focused = false
+		@_pressed = false
 
 		if type(s.mousepressedbare) == "function"
 			@on.mousepressedbare = { s.mousepressedbare }
@@ -178,24 +179,6 @@ ui.Element = class
 		else
 			@on.mouseblur = s.mouseblur
 
-		@_focused = false
-		@_pressed = false
-
-		-- Draw on canvas
-		love.graphics.setCanvas @canvas	
-		love.graphics.clear!
-		@drawFunction!
-		-- Set default canvas
-		love.graphics.setCanvas!
-
-	redraw: =>
-		-- Draw on canvas
-		love.graphics.setCanvas @canvas	
-		love.graphics.clear!
-		@drawFunction!
-		-- Set default canvas
-		love.graphics.setCanvas!
-
 	draw: =>
 		------------------- NOW USING "REDRAW"
 		-- -- Draw on canvas
@@ -207,144 +190,25 @@ ui.Element = class
 		-- love.graphics.setCanvas!
 
 		-- Draw canvas
-		love.graphics.setCanvas @output
-    	love.graphics.setColor(255, 255, 255, 255)
-    	love.graphics.setBlendMode("alpha", "premultiplied")
-		love.graphics.draw @canvas, @_x, @_y, @_r, @_sx, @_sy, @_ox, @_oy, @_kx, @_ky
+		love.graphics.push 'all'
 
-		-- Set default blend mode
-		love.graphics.setBlendMode("alpha")
-		love.graphics.setCanvas!
+		love.graphics.translate @x, @y
+		love.graphics.rotate @r
+		love.graphics.scale @sx, @sy
+		love.graphics.translate (-@ox), (-@oy)
+		love.graphics.shear @kx, @ky
+		@drawf @
 
-	------------------------
-	-- GETTERS AND SETTERS
-	------------------------
+		love.graphics.pop!
 
-	__reshape: =>
-		@_shape = hc.rectangle @_x, @_y, @_width, @_height
-		@_shape\setRotation @\getRotation!, @_x + @\getOffsetX!, @_y + @\getOffsetY!
+	reshape: =>
+		@shape = hc.rectangle(
+			((@x - @ox) * @sx),
+			((@y - @oy) * @sy),
+			@width, @height
+		)
+		@shape\setRotation @r, @x, @y
 
-
-
-	setX: (x) =>
-		@_x = x
-		@\__reshape!
-		return
-	getX: =>
-		@_x
-
-	setY: (y) =>
-		@_y = y
-		@\__reshape!
-		return
-	getY: =>
-		@_y
-
-	setPosition: (x, y) =>
-		@\setX x or @\getX!
-		@\setY y or @\getY!
-		@\__reshape!
-		return
-	getPosition: =>
-		@\getX!, @\getY!
-
-
-
-	setWidth: (w) =>
-		@_width = w or 1
-		@\__reshape!
-		return
-	getWidth: =>
-		@_width
-
-	setHeight: (h) =>
-		@_height = h or 1
-		@\__reshape!
-		return
-	getHeight: =>
-		@_height
-
-	setSize: (w, h) =>
-		@\setWidth  w or  @\getWidth!
-		@\setHeight h or @\getHeight!
-		@\__reshape!
-		return
-	getSize: () =>
-		@\getWidth!, @\getHeight!
-
-
-
-	setRotation: (r) =>
-		@_r = r
-		@\__reshape!
-	getRotation: () =>
-		@_r
-
-
-
-	setScaleX: (x) =>
-		@_sx = x
-		@\__reshape!
-	getScaleX: () =>
-		@_sx
-
-	setScaleY: (y) =>
-		@_sy = y
-		@\__reshape!
-	getScaleY: () =>
-		@_sy
-
-	setScale: (x, y) =>
-		@\setScaleX x or @\getScaleX!
-		@\setScaleY y or @\getScaleY!
-		@\__reshape!
-		return
-	getScale: () =>
-		@\getScaleX!, @\getScaleY!
-
-
-
-	setOffsetX: (x) =>
-		@_ox = x
-		@\__reshape!
-	getOffsetX: () =>
-		@_ox
-
-	setOffsetY: (y) =>
-		@_oy = y
-		@\__reshape!
-	getOffsetY: () =>
-		@_oy
-
-	setOffset: (x, y) =>
-		@\setOffsetX x or @\getOffsetX!
-		@\setOffsetY y or @\getOffsetY!
-		@\__reshape!
-		return
-	getOffset: () =>
-		@\getOffsetX!, @\getOffsetY!
-
-
-
-	setShearingX: (x) =>
-		@_kx = x
-		@\__reshape!
-	getShearingX: () =>
-		@_kx
-
-	setShearingY: (y) =>
-		@_ky = y
-		@\__reshape!
-	getShearingY: () =>
-		@_ky
-
-	setShearing: (x, y) =>
-		@\setShearingX x or @\getShearingX!
-		@\setShearingY y or @\getShearingY!
-		@\__reshape!
-		return
-	getShearing: () =>
-		@\getShearingX!, @\getShearingY!
 
 	mousepressed: (x, y, button) =>
 		x = x or love.mouse.getX!
@@ -379,14 +243,12 @@ ui.Element = class
 		x = x or love.mouse.getX!
 		y = y or love.mouse.getY!
 
-		@updateFunction x, y
-
 		if ui.__checkMouse @
 			if @on.mousefocusbare ~= nil
 				for _, listener in pairs @on.mousefocusbare
 						listener @, x, y, button
 
-			if (@on.mousefocus ~= nil) and (not @_focused)
+			if (@on.mouserfocus ~= nil) and (@_focused)
 				for _, listener in pairs @on.mousefocus
 						listener @, x, y, button	
 
@@ -394,20 +256,20 @@ ui.Element = class
 		else
 			if @on.mouseblurbare ~= nil
 				for _, listener in pairs @on.mouseblurbare
-						listener @, x, y, button
+					listener @, x, y, button
 
-			if (@on.mouseblur ~= nil) and (@_focused)
+			if (@on.mouserblur ~= nil) and (not @_focused)
 				for _, listener in pairs @on.mouseblur
-						listener @, x, y, button	
-
-			@\__setFocused false
+						listener @, x, y, button
+			@\__setFocused false 
+		@updateFunction @, x, y
 
 	__setPressed: (value) =>
-		@_pressed = value
-		@pressed  = value
-		@press    = value
-		@_release  = not value
-		@_released = not value
+		@_pressed  = value
+		@pressed   = value
+		@press     = value
+		@release  = not value
+		@released = not value
 
 	__setFocused: (value) =>
 		@_focused = value

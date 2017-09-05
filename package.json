@@ -9,7 +9,6 @@
   "author": "egorgl",
   "license": "ISC",
   "dependencies": {
-    "chmod": "0.2.1",
     "chokidar": "1.7.0",
     "del": "3.0.0",
     "gulp": "3.9.1",
@@ -17,10 +16,12 @@
     "gulp-chmod": "2.0.0",
     "gulp-concat": "2.6.1",
     "gulp-imagemin": "3.3.0",
-    "gulp-luaminify": "0.0.1",
     "gulp-replace": "0.6.1",
     "gulp-vinyl-zip": "2.0.0",
-    "run-sequence": "2.0.0",
-    "sharp": "0.18.2"
+    "run-sequence": "2.0.0"
+  },
+  "devDependencies": {
+    "gulp-imagemin": "^3.3.0",
+    "gulp-util": "^3.0.8"
   }
 }

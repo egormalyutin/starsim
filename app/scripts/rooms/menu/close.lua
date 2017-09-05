@@ -1,5 +1,5 @@
 return function(nxt)
   if nxt ~= "settings" then
-    return game.audio.menu.pause()
+    return game.audio.menu:pause()
   end
 end

@@ -1,3 +1,3 @@
 return (nxt) ->
 	if nxt ~= "settings"
-		game.audio.menu.pause!
+		game.audio.menu\pause!

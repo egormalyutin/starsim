@@ -1,4 +1,5 @@
 gulp 	= require 'gulp'
+util    = require 'gulp-util'
 seq		= require 'run-sequence'
 
 cache	= require 'gulp-cache'
@@ -23,11 +24,9 @@ gulp.task 'dist:lua', () ->
 		.src 'dist/**/*.lua'
 
 		.pipe replace /dev_enable\(\)[\s\S]*?dev_disable\(\)/gi, (match) ->
-			log "Development block removed:"
-			log match
+			util.log "Development block removed:"
+			util.log match
 			return ""
-
-		.pipe luamin()
 
 		.pipe gulp.dest 'dist'
 
@@ -70,34 +69,34 @@ gulp.task 'clean:dist', () ->
 
 gulp.task 'package:love', () ->
 	gulp.src 'dist/**/*'
-		.pipe zip.dest 'build/game.love'
+		.pipe zip.dest 'build/love/star-simulator.love'
 
 ###########################
 # EXE
 ###########################
 
 gulp.task 'exe:linux32', () ->
-	gulp.src ['build/linux32', 'build/game.love']
-		.pipe concat 'linux32'
+	gulp.src ['build/linux32/star-simulator', 'build/love/star-simulator.love']
+		.pipe concat 'star-simulator'
 		.pipe chmod 0o755
-		.pipe gulp.dest 'build'
+		.pipe gulp.dest 'build/linux32'
 
 gulp.task 'exe:linux64', () ->
-	gulp.src ['build/linux64', 'build/game.love']
-		.pipe concat 'linux64'
+	gulp.src ['build/linux64/star-simulator', 'build/love/star-simulator.love']
+		.pipe concat 'star-simulator'
 		.pipe chmod 0o755
-		.pipe gulp.dest 'build'
+		.pipe gulp.dest 'build/linux64'
 
 gulp.task 'exe:win32', () ->
-	gulp.src ['build/win32/game.exe', 'build/game.love']
-		.pipe concat 'game.exe'
+	gulp.src ['build/win32/star-simulator.exe', 'build/love/star-simulator.love']
+		.pipe concat 'star-simulator.exe'
 		.pipe chmod 0o755
 		.pipe gulp.dest 'build/win32'
 
 gulp.task 'exe:win64', () ->
-	gulp.src ['build/win64/game.exe', 'build/game.love']
-		.pipe concat 'game.exe'
-		.pipe chmod 0x755
+	gulp.src ['build/win64/star-simulator.exe', 'build/love/star-simulator.love']
+		.pipe concat 'star-simulator.exe'
+		.pipe chmod 0o755
 		.pipe gulp.dest 'build/win64'
 
 gulp.task 'exe', ['exe:linux32', 'exe:linux64', 'exe:win32', 'exe:win64']

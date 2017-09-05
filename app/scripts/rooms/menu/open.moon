@@ -30,6 +30,8 @@ return (last) ->
 	rooms.ui.start = rooms.ui.button x, y, 
 		phrases.startGame,
 		() -> 
+			print 'GAME STARTED!'
+			game.startGame "setName", "sdsds"
 
 	rooms.ui.settings = rooms.ui.button x, y + py, 
 		phrases.settings,

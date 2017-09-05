@@ -19,7 +19,10 @@ return function(last)
   local x = sizes.position.x * 10
   local y = sizes.position.y * 23
   local py = sizes.position.y * 12
-  rooms.ui.start = rooms.ui.button(x, y, phrases.startGame, function() end)
+  rooms.ui.start = rooms.ui.button(x, y, phrases.startGame, function()
+    print('GAME STARTED!')
+    return game.startGame("setName", "sdsds")
+  end)
   rooms.ui.settings = rooms.ui.button(x, y + py, phrases.settings, function()
     return game.setRoom("settings")
   end)
