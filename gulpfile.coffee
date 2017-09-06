@@ -7,7 +7,6 @@ concat 	= require 'gulp-concat'
 chmod	= require 'gulp-chmod'
 image	= require 'gulp-imagemin'
 del		= require 'del'
-luamin	= require 'gulp-luaminify'
 replace = require 'gulp-replace'
 zip		= require 'gulp-vinyl-zip'
 
