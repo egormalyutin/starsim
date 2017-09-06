@@ -134,6 +134,7 @@ love.update = function(dt)
   end
   if (game.room == "play") then
     game.playing.update(dt)
+    game.ui.update(rooms.ui.all)
   end
   dev_enable()
   lovebird.update()
@@ -147,7 +148,8 @@ love.draw = function()
     game.ui.draw(rooms.ui.all)
   end
   if (game.room == "play") then
-    return game.playing.draw()
+    game.playing.draw()
+    return game.ui.draw(rooms.ui.all)
   end
 end
 love.resize = defaultSize

@@ -159,6 +159,7 @@ love.update = (dt) ->
 
 	if (game.room == "play")
 		game.playing.update dt
+		game.ui.update rooms.ui.all
 
 	dev_enable()
 	lovebird.update!
@@ -179,6 +180,7 @@ love.draw = ->
 
 	if (game.room == "play")
 		game.playing.draw!
+		game.ui.draw rooms.ui.all
 
 
 -- Reload positions and sizes, when window changes size

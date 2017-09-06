@@ -1,5 +1,5 @@
 return class
-		new:    (self, @content) -> -- "self" is important here!
+		new:    (@ui, @content) =>
+			@button = @ui.button 'PRESS ME', 100, 100, () -> error 'YOU PRESSED ME!'
 		update: () ->
 		draw:   () ->
-			love.graphics.print 'OLOLO', 0, 0

@@ -2,14 +2,15 @@ do
   local _class_0
   local _base_0 = {
     update = function() end,
-    draw = function()
-      return love.graphics.print('OLOLO', 0, 0)
-    end
+    draw = function() end
   }
   _base_0.__index = _base_0
   _class_0 = setmetatable({
-    __init = function(self, content)
-      self.content = content
+    __init = function(self, ui, content)
+      self.ui, self.content = ui, content
+      self.button = self.ui.button('PRESS ME', 100, 100, function()
+        return error('YOU PRESSED ME!')
+      end)
     end,
     __base = _base_0,
     __name = nil
