@@ -1,6 +1,6 @@
 local phrases = {
   english = {
-    name = "LOREM IPSUM",
+    name = "STAR SIMULATOR",
     startGame = "START GAME",
     settings = "SETTINGS",
     backward = "BACKWARD",
@@ -12,7 +12,7 @@ local phrases = {
     saveSettings2 = "(APP WILL RESTART)"
   },
   russian = {
-    name = "LOREM IPSUM",
+    name = "STAR SIMULATOR",
     startGame = "НАЧАТЬ ИГРУ",
     settings = "НАСТРОЙКИ",
     backward = "НАЗАД",
