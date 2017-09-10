@@ -90,14 +90,7 @@ defaultSize = () ->
 
 love.load = () ->
 	-- MoonScript requires
-	export game, rooms, phrases, sizes, DECORATIONS
-
-	DECORATIONS = true
-	MUSIC = true
-	dev_enable()
-	-- DECORATIONS = false
-	MUSIC = true
-	dev_disable()
+	export game, rooms, phrases, sizes
 
 	game = {
 		-- Aliases
@@ -219,9 +212,10 @@ love.load = () ->
 
 	game.preload   = {}
 
-	game.preload.printY = (sizes.height / 2) - (((game.fonts.love\getHeight!) + 170) / 2)
-	game.preload.y      = game.preload.printY + game.fonts.love\getHeight! + 10
-	game.preload.x = (sizes.width  / 2) - (game.fonts.love\getWidth(phrases.poweredBy) / 2)
+	game.preload.printY  = (sizes.height / 2) - (((game.fonts.love\getHeight! * 2) + 150) / 2)
+
+	game.preload.y       = game.preload.printY + game.fonts.love\getHeight! * 2
+	game.preload.x 		 = (sizes.width  / 2) - (game.fonts.love\getWidth(phrases.poweredBy) / 2)
 
 	game.preload.authorX = (sizes.width  / 2) - (game.fonts.author\getWidth(phrases.author) / 2)
 	game.preload.authorY = (sizes.height / 2) - (game.fonts.author\getHeight! / 2)
@@ -263,10 +257,10 @@ love.draw = ->
 		game.setFont game.fonts.logo
 
 		-- Draw sky
-		game.draw game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080 if DECORATIONS
+		game.draw game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080
 
 		-- Draw station
-		game.draw game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale if DECORATIONS
+		game.draw game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale
 
 		game.ui.draw rooms.ui.all
 
