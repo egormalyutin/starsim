@@ -6,9 +6,7 @@ return () ->
 			-- Draw text of buttons
 			game.color 255, 255, 255
 			love.graphics.setFont game.fonts.logo
-			game.text phrases.name, 0, 0
-			love.graphics.setLineWidth 10
-			love.graphics.setLineStyle "rough"
+			game.text phrases.name, 0, 0 if DECORATIONS
 
 
 		x: sizes.position.x * 5

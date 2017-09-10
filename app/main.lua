@@ -5,6 +5,53 @@ dev_disable = function() end
 dev_enable()
 local lovebird = require('scripts.libs.lovebird')
 dev_disable()
+love.run = function()
+  if love.math then
+    love.math.setRandomSeed(os.time())
+  end
+  if love.load then
+    love.load(arg)
+  end
+  if love.timer then
+    love.timer.step()
+  end
+  local dt = 0
+  while true do
+    if love.event then
+      love.event.pump()
+      for name, a, b, c, d, e, f in love.event.poll() do
+        if name == "quit" then
+          if not love.quit or not love.quit() then
+            return a
+          end
+        end
+        love.handlers[name](a, b, c, d, e, f)
+      end
+    end
+    if love.timer then
+      love.timer.step()
+      dt = love.timer.getDelta()
+    end
+    if love.update then
+      love.update(dt)
+    end
+    if love.graphics and love.graphics.isActive() then
+      love.graphics.clear(love.graphics.getBackgroundColor())
+      love.graphics.origin()
+      if love.preload and game.preloadProgress ~= 2 then
+        love.preload()
+      else
+        if love.draw then
+          love.draw()
+        end
+      end
+      love.graphics.present()
+    end
+    if love.timer then
+      love.timer.sleep(0.001)
+    end
+  end
+end
 local defaultSize
 defaultSize = function()
   love.window.setFullscreen(1)
@@ -18,6 +65,20 @@ defaultSize = function()
   sizes.position.x = math.floor(sizes.width / 100)
   sizes.position.y = math.floor(sizes.height / 100)
   sizes.scale = sizes.width / 1366
+  sizes.scaleY = sizes.height / 768
+  rooms.ui = { }
+  game.fonts = {
+    buttonSize = math.floor(sizes.scale * 50),
+    logoSize = math.floor(sizes.scale * 100),
+    playSize = math.floor(sizes.scale * 25),
+    loveSize = math.floor(sizes.scale * 40),
+    authorSize = math.floor(sizes.scale * 60)
+  }
+  game.fonts.menu = love.graphics.newFont("resources/fonts/menu.ttf", game.fonts.buttonSize)
+  game.fonts.logo = love.graphics.newFont("resources/fonts/logo.ttf", game.fonts.logoSize)
+  game.fonts.play = love.graphics.newFont("resources/fonts/play.ttf", game.fonts.playSize)
+  game.fonts.love = love.graphics.newFont("resources/fonts/love.woff", game.fonts.loveSize)
+  game.fonts.author = love.graphics.newFont("resources/fonts/play.ttf", game.fonts.authorSize)
   if rooms[game.room] then
     if rooms[game.room].open then
       return rooms[game.room].open(game.room)
@@ -25,6 +86,11 @@ defaultSize = function()
   end
 end
 love.load = function()
+  DECORATIONS = true
+  local MUSIC = true
+  dev_enable()
+  MUSIC = true
+  dev_disable()
   game = {
     pressed = love.keyboard.isDown,
     draw = love.graphics.draw,
@@ -42,6 +108,7 @@ love.load = function()
     ui = require('scripts/libs/ui'),
     binser = require('scripts/libs/binser'),
     Audio = require('scripts/audio'),
+    timer = require('scripts/libs/hump-timer'),
     room = "empty",
     roomHistory = {
       'menu'
@@ -53,6 +120,8 @@ love.load = function()
         end
       end
       table.insert(game.roomHistory, room)
+      game.ui.destroy(rooms.ui.all)
+      game.ui.destroy(game.ui.elements)
       game.room = room
       if rooms[room] then
         if rooms[room].open then
@@ -73,7 +142,7 @@ love.load = function()
         close = require('scripts/rooms/settings/close')
       },
       play = {
-        open = function() end,
+        open = require('scripts/rooms/play/open'),
         close = function() end
       }
     },
@@ -104,7 +173,8 @@ love.load = function()
       game.text(phrases.wait, x, y)
       return love.event.quit('restart')
     end,
-    sizes = { }
+    sizes = { },
+    preloadProgress = 0
   }
   sizes = game.sizes
   phrases = game.phrases.current
@@ -117,12 +187,38 @@ love.load = function()
   }
   game.images = {
     sky = game.image("resources/images/starsky.png"),
-    logo = game.image("resources/images/logomenu.png"),
-    station = game.image("resources/images/station.png")
+    station = game.image("resources/images/station.png"),
+    love = game.image("resources/images/powered-by.png")
   }
   defaultSize()
   game.setRoom(room or "menu")
+  game.timer.after(5, function()
+    game.preloadProgress = 1
+  end)
+  game.timer.after(8, function()
+    game.preloadProgress = 2
+    love.graphics.clear(love.graphics.getBackgroundColor())
+    love.graphics.origin()
+    return love.graphics.present()
+  end)
   game.ui.update(rooms.ui.all, nil, nil, 0)
+  game.preload = { }
+  game.preload.printY = (sizes.height / 2) - (((game.fonts.love:getHeight()) + 170) / 2)
+  game.preload.y = game.preload.printY + game.fonts.love:getHeight() + 10
+  game.preload.x = (sizes.width / 2) - (game.fonts.love:getWidth(phrases.poweredBy) / 2)
+  game.preload.authorX = (sizes.width / 2) - (game.fonts.author:getWidth(phrases.author) / 2)
+  game.preload.authorY = (sizes.height / 2) - (game.fonts.author:getHeight() / 2)
+end
+love.preload = function()
+  if game.preloadProgress == 0 then
+    love.graphics.setFont(game.fonts.love)
+    love.graphics.print(phrases.poweredBy, game.preload.x, game.preload.printY)
+    love.graphics.draw(game.images.love, sizes.width / 2 - 236, game.preload.y)
+  end
+  if game.preloadProgress == 1 then
+    love.graphics.setFont(game.fonts.author)
+    return love.graphics.print(phrases.author, game.preload.authorX, game.preload.authorY)
+  end
 end
 love.update = function(dt)
   if game.pressed('lctrl') and game.pressed('lshift') and game.pressed('r') then
@@ -133,9 +229,12 @@ love.update = function(dt)
     game.ui.update(game.rooms.ui.all)
   end
   if (game.room == "play") then
-    game.playing.update(dt)
+    if game.playing then
+      game.playing.update(dt)
+    end
     game.ui.update(rooms.ui.all)
   end
+  game.timer.update(dt)
   dev_enable()
   lovebird.update()
   return dev_disable()
@@ -143,14 +242,24 @@ end
 love.draw = function()
   if (game.room == "menu") or (game.room == "settings") then
     game.setFont(game.fonts.logo)
-    game.draw(game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080)
-    game.draw(game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale)
+    if DECORATIONS then
+      game.draw(game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080)
+    end
+    if DECORATIONS then
+      game.draw(game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale)
+    end
     game.ui.draw(rooms.ui.all)
   end
   if (game.room == "play") then
-    game.playing.draw()
-    return game.ui.draw(rooms.ui.all)
+    if game.playing then
+      game.playing.draw()
+    end
+    game.ui.draw(rooms.ui.all)
   end
+  dev_enable()
+  love.graphics.setFont(game.fonts.play)
+  love.graphics.print(tostring(love.timer.getFPS()), 5, sizes.height - 25)
+  return dev_disable()
 end
 love.resize = defaultSize
 love.mousepressed = function()

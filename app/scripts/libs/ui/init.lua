@@ -104,6 +104,11 @@ do
     update = function(self)
       self.elements = nil
       self.elements = ui.__filter(self.patterns)
+    end,
+    sort = function(self)
+      return table.sort(self.elements, function(a, b)
+        return a.z < b.z
+      end)
     end
   }
   _base_0.__index = _base_0
@@ -112,6 +117,7 @@ do
       self.patterns = patterns
       self.elements = ui.__filter(self.patterns)
       self.__type = "Filter"
+      return self:sort()
     end,
     __base = _base_0,
     __name = "Filter"
@@ -244,6 +250,7 @@ do
       self.oy = s.oy or 0
       self.kx = s.kx or 0
       self.ky = s.ky or 0
+      self.z = s.z or 1
       if not self.x then
         self.x = 0
       end

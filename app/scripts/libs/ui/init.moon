@@ -81,20 +81,25 @@ ui.__checkMouse = (elem) ->
 
 	false
 
-
 -----------------------
 -- CLASSES
 -----------------------
 
 ui.Filter = class
-	new: (patterns) =>
-		@patterns = patterns
+	new: (@patterns) =>
 		@elements = ui.__filter @patterns
 		@__type = "Filter"
+		
+		@\sort!
 
 	update: =>
 		@elements = nil	
 		@elements = ui.__filter @patterns
+
+	sort: =>
+		table.sort @elements, (a, b) ->
+			a.z < b.z
+
 
 ui.Element = class
 	new: (s) =>
@@ -113,6 +118,7 @@ ui.Element = class
 		@oy = s.oy or 0
 		@kx = s.kx or 0
 		@ky = s.ky or 0
+		@z  = s.z  or 1
 
 		if not @x then @x = 0
 		if not @y then @y = 0

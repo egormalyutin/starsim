@@ -7,13 +7,6 @@ return (last) ->
 	rooms.ui.station.x     = sizes.width  - ( rooms.ui.station.scale * 1211 )
 	rooms.ui.station.y     = sizes.height - ( rooms.ui.station.scale * 427 )
 
-	game.fonts = 
-		buttonSize: math.floor sizes.scale * 50
-		logoSize: math.floor sizes.scale * 100
-
-	game.fonts.menu = love.graphics.newFont "resources/fonts/menu.ttf", game.fonts.buttonSize 
-	game.fonts.logo = love.graphics.newFont "resources/fonts/logo.ttf", game.fonts.logoSize
-
 	-- Load UI
 	rooms.ui.all     = game.ui.Filter { "." }
 
@@ -30,7 +23,6 @@ return (last) ->
 	rooms.ui.start = rooms.ui.button x, y, 
 		phrases.startGame,
 		() -> 
-			print 'GAME STARTED!'
 			game.startGame "setName", "sdsds"
 
 	rooms.ui.settings = rooms.ui.button x, y + py, 

@@ -10,6 +10,8 @@
 				wait:          "PLEASE WAIT..."
 				saveSettings:  "SAVE SETTINGS" 
 				saveSettings2: "(APP WILL RESTART)"
+				poweredBy:     "powered by"
+				author:	       "malyutinegor.github.io"
 
 	russian:
 				name:      	   "STAR SIMULATOR"
@@ -22,6 +24,8 @@
 				wait:          "ПОЖАЛУЙСТА, ПОДОЖДИТЕ..."
 				saveSettings:  "СОХРАНИТЬ НАСТРОЙКИ"
 				saveSettings2: "(ПРИЛОЖЕНИЕ ПЕРЕЗАПУСТИТСЯ)"
+				poweredBy:     "powered by"
+				author:	       "malyutinegor.github.io"
 } 
 
 phrases.current = phrases.russian
