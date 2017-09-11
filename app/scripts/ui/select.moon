@@ -6,6 +6,10 @@ return (x, y, label, vars = (error 'Variants is nil'), changed, def) ->
 	buttons.label = game.ui.Element {
 		draw: =>
 			game.setFont game.fonts.menu
+			game.color 0, 0, 0, 70
+			love.graphics.print label, -1, -1
+			love.graphics.print label,  1,  1
+			game.color 255, 255, 255, 255
 			game.text label, 0, 0
 
 		x: x
@@ -19,12 +23,16 @@ return (x, y, label, vars = (error 'Variants is nil'), changed, def) ->
 
 	buttons.prev = game.ui.Element {
 		draw: =>
+
 			if current - 1 > 0
+				game.setFont game.fonts.menu
+				game.color 0, 0, 0, 70
+				love.graphics.print "<", -1, -1
+				love.graphics.print "<",  1,  1
 				if @hover
 					game.color 255, 255, 255, 150
 				else
 					game.color 255, 255, 255, 255
-				game.setFont game.fonts.menu
 				game.text "<", 0, 0
 
 		x: x + prevX
@@ -50,6 +58,10 @@ return (x, y, label, vars = (error 'Variants is nil'), changed, def) ->
 	buttons.var = game.ui.Element {
 		draw: =>
 			game.setFont game.fonts.menu
+			game.color 0, 0, 0, 70
+			love.graphics.print vars[current], -1, -1
+			love.graphics.print vars[current],  1,  1
+			game.color 255, 255, 255, 255
 			game.text vars[current], 0, 0
 
 		x: x + varX
@@ -64,11 +76,14 @@ return (x, y, label, vars = (error 'Variants is nil'), changed, def) ->
 	buttons.next = game.ui.Element {
 		draw: =>
 			if current + 1 <= #vars
+				game.setFont game.fonts.menu
+				game.color 0, 0, 0, 70
+				love.graphics.print ">", -1, -1
+				love.graphics.print ">",  1,  1
 				if @hover
 					game.color 255, 255, 255, 150
 				else
 					game.color 255, 255, 255, 255
-				game.setFont game.fonts.menu
 				game.text '>', 0, 0
 
 		x: buttons.var.x + buttons.var.width + 6

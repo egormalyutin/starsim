@@ -15,6 +15,13 @@ return {
               return self.checkResults(self:results())
             end)
             self.ui.bar.button("НАЗВАНИЕ ЗВЕЗДЫ: ", nil, true)
+            local variants = {
+              "Аль Салиб",
+              "Аль Укуд",
+              "Суалоцин",
+              "Ротанев",
+              "Денеб Дулфим"
+            }
             a = self.ui.bar.selectOne({
               " "
             }, function(var, text) end)
@@ -27,51 +34,40 @@ return {
             self.skyY = self.ui.height / 2 - self.skyCH / 2
             local rets = { }
             self.rets = rets
-            self.newStar = function(self, img, x, y, items, sx, sy)
-              if sx == nil then
-                sx = 1
-              end
-              if sy == nil then
-                sy = 1
-              end
-              local image = love.graphics.newImage(img)
+            self.newStar = function(self, radius, x, y, right)
+              x = x / 100
+              y = y / 100
+              radius = radius / 100
+              x = x * self.skyCW
+              y = y * self.skyCH
+              radius = radius * self.skyCH
+              x = x + self.skyX
+              y = y + self.skyY
               local ret = self.ui.element({
                 draw = function(self)
                   love.graphics.setColor(255, 255, 255)
-                  love.graphics.draw(image)
+                  love.graphics.circle("fill", radius, radius, radius)
                   love.graphics.setFont(game.fonts.small)
                   if self._text then
-                    return love.graphics.printf(self._text, 0, self.height + 1, self.width, 'center')
+                    return love.graphics.printf(self._text, -self.width, self.height + 1, self.width * 3, 'center')
                   end
                 end,
-                x = x,
-                y = y,
-                width = 106,
-                height = 106,
-                sx = sx,
-                sy = sy,
+                x = x - radius,
+                y = y - radius,
+                width = radius * 2,
+                height = radius * 2,
                 mousereleased = function(self)
                   if not self._text then
                     a.current = 1
                   end
                   if self._text then
-                    for name, value in pairs({
-                      "Звезда №1",
-                      "Звезда №2",
-                      "Звезда №3",
-                      "Звезда №4"
-                    }) do
+                    for name, value in pairs(variants) do
                       if self._text == value then
                         a.current = name
                       end
                     end
                   end
-                  a.variants = {
-                    "Звезда №1",
-                    "Звезда №2",
-                    "Звезда №3",
-                    "Звезда №4"
-                  }
+                  a.variants = variants
                   a.changed = function(_, text)
                     self._text = text
                   end
@@ -81,21 +77,29 @@ return {
                 end,
                 tags = {
                   'name'
+                },
+                data = {
+                  right = right
                 }
               })
-              return table.insert(rets, ret)
+              ret._right = right
+              table.insert(rets, ret)
+              return ret
             end
-            self:newStar("resources/images/star1.png", 100, 100)
-            self:newStar("resources/images/star2.png", 300, 200)
-            self:newStar("resources/images/star3.png", 700, 200)
-            self:newStar("resources/images/star4.png", 900, 500)
             sf.ui.bar.updatePositions()
+            local r = 2
+            self:newStar(r, 14, 48, "Аль Салиб")
+            self:newStar(r, 26, 55, "Аль Укуд")
+            self:newStar(r, 27, 27, "Суалоцин")
+            self:newStar(r, 42, 42, "Ротанев")
+            self:newStar(r, 70, 56, "Денеб Дулфим")
             return self.filter:update()
           end,
           update = function(self)
             return game.ui.update(self.filter)
           end,
           draw = function(self)
+            local x, y = love.mouse.getPosition()
             love.graphics.draw(self.sky, self.skyX, self.skyY + self.ui.bar.height, nil, self.skyS)
             return game.ui.draw(self.filter)
           end,
@@ -107,19 +111,14 @@ return {
           end,
           results = function(self)
             local proc = 0
-            game.ret = self.rets[1]
-            if self.rets[1]._text == "Звезда №1" then
-              proc = proc + 25
+            local cnt = 0
+            local len = #self.rets
+            for _, item in ipairs(self.rets) do
+              if item._text == item._right then
+                cnt = cnt + 1
+              end
             end
-            if self.rets[2]._text == "Звезда №2" then
-              proc = proc + 25
-            end
-            if self.rets[3]._text == "Звезда №3" then
-              proc = proc + 25
-            end
-            if self.rets[4]._text == "Звезда №4" then
-              proc = proc + 25
-            end
+            proc = cnt / len * 100
             return proc
           end
         }

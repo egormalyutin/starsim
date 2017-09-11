@@ -483,10 +483,11 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 	-- LOAD
 
 	results = (proc) ->
-		text = "Вы выполнили задание на " .. proc .. "%!"
+		text = "Вы выполнили задание на " .. proc .. "% правильно!"
 		w    = game.fonts.play\getWidth text
 		love.graphics.clear!
 		love.graphics.origin!
+		love.graphics.setFont game.fonts.play
 		love.graphics.print text, sizes.width / 2 - w / 2, sizes.height / 2
 
 		love.graphics.present!

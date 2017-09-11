@@ -1,5 +1,5 @@
 #!/usr/bin/node
-// I lose .coffee file :P
+// I losed .coffee file :P
 var exec, log, watch;
 
 watch = require('chokidar');

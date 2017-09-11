@@ -7,6 +7,10 @@ return function(x, y, label, vars, changed, def)
   buttons.label = game.ui.Element({
     draw = function(self)
       game.setFont(game.fonts.menu)
+      game.color(0, 0, 0, 70)
+      love.graphics.print(label, -1, -1)
+      love.graphics.print(label, 1, 1)
+      game.color(255, 255, 255, 255)
       return game.text(label, 0, 0)
     end,
     x = x,
@@ -20,12 +24,15 @@ return function(x, y, label, vars, changed, def)
   buttons.prev = game.ui.Element({
     draw = function(self)
       if current - 1 > 0 then
+        game.setFont(game.fonts.menu)
+        game.color(0, 0, 0, 70)
+        love.graphics.print("<", -1, -1)
+        love.graphics.print("<", 1, 1)
         if self.hover then
           game.color(255, 255, 255, 150)
         else
           game.color(255, 255, 255, 255)
         end
-        game.setFont(game.fonts.menu)
         return game.text("<", 0, 0)
       end
     end,
@@ -51,6 +58,10 @@ return function(x, y, label, vars, changed, def)
   buttons.var = game.ui.Element({
     draw = function(self)
       game.setFont(game.fonts.menu)
+      game.color(0, 0, 0, 70)
+      love.graphics.print(vars[current], -1, -1)
+      love.graphics.print(vars[current], 1, 1)
+      game.color(255, 255, 255, 255)
       return game.text(vars[current], 0, 0)
     end,
     x = x + varX,
@@ -64,12 +75,15 @@ return function(x, y, label, vars, changed, def)
   buttons.next = game.ui.Element({
     draw = function(self)
       if current + 1 <= #vars then
+        game.setFont(game.fonts.menu)
+        game.color(0, 0, 0, 70)
+        love.graphics.print(">", -1, -1)
+        love.graphics.print(">", 1, 1)
         if self.hover then
           game.color(255, 255, 255, 150)
         else
           game.color(255, 255, 255, 255)
         end
-        game.setFont(game.fonts.menu)
         return game.text('>', 0, 0)
       end
     end,
