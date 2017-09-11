@@ -4,9 +4,9 @@ return () ->
 	game.ui.Element {
 		draw: =>
 			-- Draw text of buttons
-			game.color 255, 255, 255
-			love.graphics.setFont game.fonts.logo
-			game.text phrases.name, 0, 0 if DECORATIONS
+			love.graphics.setColor 255, 255, 255
+			love.graphics.setFont  game.fonts.logo
+			love.graphics.print    phrases.name
 
 
 		x: sizes.position.x * 5

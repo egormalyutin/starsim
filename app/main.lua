@@ -54,11 +54,17 @@ love.run = function()
 end
 local defaultSize
 defaultSize = function()
-  love.window.setFullscreen(1)
-  local w, h = love.window.getMode()
+  love.resize = nil
+  local w, h = love.window.getDesktopDimensions()
+  if w <= 1366 or h <= 768 then
+    love.window.setMode(w, h, {
+      fullscreen = true
+    })
+  end
   if w > 1366 or h > 768 then
-    love.window.setFullscreen(0)
-    love.window.setMode(1366, 768)
+    love.window.setMode(1366, 768, {
+      centered = true
+    })
   end
   sizes.width, sizes.height = love.window.getMode()
   sizes.position = { }
@@ -66,7 +72,9 @@ defaultSize = function()
   sizes.position.y = math.floor(sizes.height / 100)
   sizes.scale = sizes.width / 1366
   sizes.scaleY = sizes.height / 768
-  rooms.ui = { }
+  if not rooms.ui then
+    rooms.ui = { }
+  end
   game.fonts = {
     buttonSize = math.floor(sizes.scale * 50),
     logoSize = math.floor(sizes.scale * 100),
@@ -79,18 +87,15 @@ defaultSize = function()
   game.fonts.play = love.graphics.newFont("resources/fonts/play.ttf", game.fonts.playSize)
   game.fonts.love = love.graphics.newFont("resources/fonts/love.woff", game.fonts.loveSize)
   game.fonts.author = love.graphics.newFont("resources/fonts/play.ttf", game.fonts.authorSize)
-  if rooms[game.room] then
-    if rooms[game.room].open then
-      return rooms[game.room].open(game.room)
-    end
-  end
+  game.preload = { }
+  game.preload.printY = (sizes.height / 2) - (((game.fonts.love:getHeight() * 2) + 150) / 2)
+  game.preload.y = game.preload.printY + game.fonts.love:getHeight() * 2
+  game.preload.x = (sizes.width / 2) - (game.fonts.love:getWidth(phrases.poweredBy) / 2)
+  game.preload.authorX = (sizes.width / 2) - (game.fonts.author:getWidth(phrases.author) / 2)
+  game.preload.authorY = (sizes.height / 2) - (game.fonts.author:getHeight() / 2)
+  love.resize = defaultSize
 end
 love.load = function()
-  DECORATIONS = true
-  local MUSIC = true
-  dev_enable()
-  MUSIC = true
-  dev_disable()
   game = {
     pressed = love.keyboard.isDown,
     draw = love.graphics.draw,
@@ -109,6 +114,23 @@ love.load = function()
     binser = require('scripts/libs/binser'),
     Audio = require('scripts/audio'),
     timer = require('scripts/libs/hump-timer'),
+    musicTags = {
+      'music'
+    },
+    saveData = {
+      language = 'russian',
+      sound = true
+    },
+    save = function()
+      return love.filesystem.write(game.dataFile, (game.binser.s(game.saveData)))
+    end,
+    loadData = function()
+      if love.filesystem.exists(game.dataFile) then
+        local readed = love.filesystem.read(game.dataFile)
+        game.saveData = game.binser.dn(readed)
+      end
+    end,
+    dataFile = 'data.dat',
     room = "empty",
     roomHistory = {
       'menu'
@@ -165,17 +187,27 @@ love.load = function()
     end,
     setLanguage = function(lang, room)
       game.phrases.current = lang
-      love.graphics.clear()
       local w = game.fonts.menu:getWidth(phrases.wait)
       local h = game.fonts.menu:getHeight()
       local x = (sizes.width / 2) - (w / 2)
       local y = (sizes.height / 2) - (h / 2)
+      love.graphics.clear()
+      love.graphics.origin()
       game.text(phrases.wait, x, y)
+      love.graphics.present()
+      for name, value in pairs(game.phrases) do
+        if value == lang and name ~= 'current' then
+          game.saveData.language = name
+        end
+      end
+      game.save()
       return love.event.quit('restart')
     end,
     sizes = { },
     preloadProgress = 0
   }
+  game.loadData()
+  game.phrases.current = game.phrases[game.saveData.language]
   sizes = game.sizes
   phrases = game.phrases.current
   rooms = game.rooms
@@ -183,7 +215,7 @@ love.load = function()
   love.graphics.setBackgroundColor(0, 0, 0)
   love.window.setIcon(love.image.newImageData('resources/images/icon.png'))
   game.audio = {
-    menu = game.Audio("resources/audio/menu.mp3")
+    menu = game.Audio("music", "resources/audio/menu.mp3")
   }
   game.images = {
     sky = game.image("resources/images/starsky.png"),
@@ -202,12 +234,6 @@ love.load = function()
     return love.graphics.present()
   end)
   game.ui.update(rooms.ui.all, nil, nil, 0)
-  game.preload = { }
-  game.preload.printY = (sizes.height / 2) - (((game.fonts.love:getHeight()) + 170) / 2)
-  game.preload.y = game.preload.printY + game.fonts.love:getHeight() + 10
-  game.preload.x = (sizes.width / 2) - (game.fonts.love:getWidth(phrases.poweredBy) / 2)
-  game.preload.authorX = (sizes.width / 2) - (game.fonts.author:getWidth(phrases.author) / 2)
-  game.preload.authorY = (sizes.height / 2) - (game.fonts.author:getHeight() / 2)
 end
 love.preload = function()
   if game.preloadProgress == 0 then
@@ -242,12 +268,8 @@ end
 love.draw = function()
   if (game.room == "menu") or (game.room == "settings") then
     game.setFont(game.fonts.logo)
-    if DECORATIONS then
-      game.draw(game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080)
-    end
-    if DECORATIONS then
-      game.draw(game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale)
-    end
+    game.draw(game.images.sky, sizes.width / 2, sizes.height / 2, rooms.menu.sky.angle, nil, nil, 1920, 1080)
+    game.draw(game.images.station, rooms.ui.station.x, rooms.ui.station.y, nil, rooms.ui.station.scale)
     game.ui.draw(rooms.ui.all)
   end
   if (game.room == "play") then

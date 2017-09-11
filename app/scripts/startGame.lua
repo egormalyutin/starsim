@@ -148,23 +148,19 @@ return function(mode, content)
     table.insert(ui.bar.elements, (ui.line(0, 0)))
     return ui.bar.updatePositions()
   end
-  local preloaderName = 'Lorem ipsum dolor sit amet, cononcdentrius dsdsd'
+  local preloaderDescription = modes[mode].description
   local preloader = game.ui.Element({
     draw = function(self)
       love.graphics.setColor(0, 0, 0, self.data.alpha)
       love.graphics.rectangle('fill', 0, 0, sizes.width, sizes.height)
       love.graphics.setColor(255, 255, 255, self.data.alpha)
       love.graphics.setFont(game.fonts.play)
-      local str = string.sub(preloaderName, 0, self.data.text)
-      if (#str % 3 == 1) and (#str ~= #preloaderName) then
-        str = str .. '_'
-      end
-      return love.graphics.print(str, sizes.position.y * 10, sizes.height - sizes.position.y * 10)
+      return love.graphics.print(preloaderDescription, sizes.position.y * 10 - self.data.text, sizes.height - sizes.position.y * 10)
     end,
     z = 3,
     data = {
       alpha = 0,
-      text = 0
+      text = game.fonts.menu:getWidth(preloaderDescription)
     },
     tags = {
       'preloader'
@@ -174,15 +170,15 @@ return function(mode, content)
     alpha = 255
   }, 'in-out-linear')
   game.timer.tween(1.5, preloader.data, {
-    text = #preloaderName
-  }, 'in-out-linear')
+    text = 0
+  }, 'out-quad')
   rooms.ui.all = game.ui.Filter({
     'preloader'
   })
   game.playing = Cls(ui, content)
   game.playing.update = game.playing.update or function() end
   game.playing.draw = game.playing.draw or function() end
-  return game.timer.after(4, function(self)
+  return game.timer.after(6, function(self)
     rooms.ui.all = game.ui.Filter({
       'game',
       'preloader'

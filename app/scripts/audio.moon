@@ -1,9 +1,22 @@
 -- AUDIO
 
 Audio = class
-	new: (source, tp) =>
+	new: (tags, source, tp) =>
 		if type(source) == "string"
+			ex = (() ->
+				if type(tags) ~= 'table'
+					@tags = { tags } 
+				else
+					@tags = tags
+
+				for _, tag in pairs game.musicTags
+					for _, tag2 in pairs @tags
+						if tag == tag2
+							return true
+				false
+			)()
 			@source = love.audio.newSource source, tp
+			@source\setVolume 0 if not ex
 		else
 			@source = source\clone!
 

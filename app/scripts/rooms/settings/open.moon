@@ -32,9 +32,9 @@ return () ->
 				when 1 then rooms.settings.lang = {game.phrases.russian, 'settings'}
 				when 2 then rooms.settings.lang = {game.phrases.english, 'settings'}
 		(->
-			if game.phrases.russian = game.phrases.current
+			if game.phrases.russian == game.phrases.current
 				return 1
-			if game.phrases.english = game.phrases.current
+			if game.phrases.english == game.phrases.current
 				return 2
 		)()
 		)
@@ -46,7 +46,14 @@ return () ->
 				game.setLanguage unpack rooms.settings.lang
 		phrases.saveSettings2)
 
-	rooms.ui.backward = rooms.ui.button x, y + py * 3, 
+	rooms.ui.source    = rooms.ui.button x, y + py * 3,
+		phrases.source,
+		() -> 
+			succes = love.system.openURL(phrases.sourceLink)
+			if succes
+				love.window.minimize!
+
+	rooms.ui.backward = rooms.ui.button x, y + py * 4, 
 		phrases.backward,
 		() -> 
 			game.setRoom game.roomHistory[#game.roomHistory - 1]

@@ -37,17 +37,11 @@ return function()
       }
     end
   end, (function()
-    do
-      game.phrases.russian = game.phrases.current
-      if game.phrases.russian then
-        return 1
-      end
+    if game.phrases.russian == game.phrases.current then
+      return 1
     end
-    do
-      game.phrases.english = game.phrases.current
-      if game.phrases.english then
-        return 2
-      end
+    if game.phrases.english == game.phrases.current then
+      return 2
     end
   end)())
   rooms.ui.save = rooms.ui.button(x, y + py, phrases.saveSettings, function()
@@ -55,7 +49,13 @@ return function()
       return game.setLanguage(unpack(rooms.settings.lang))
     end
   end, phrases.saveSettings2)
-  rooms.ui.backward = rooms.ui.button(x, y + py * 3, phrases.backward, function()
+  rooms.ui.source = rooms.ui.button(x, y + py * 3, phrases.source, function()
+    local succes = love.system.openURL(phrases.sourceLink)
+    if succes then
+      return love.window.minimize()
+    end
+  end)
+  rooms.ui.backward = rooms.ui.button(x, y + py * 4, phrases.backward, function()
     return game.setRoom(game.roomHistory[#game.roomHistory - 1])
   end)
   game.audio.menu:play()

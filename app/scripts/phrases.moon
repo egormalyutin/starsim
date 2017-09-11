@@ -3,7 +3,7 @@
 				name:		   "STAR SIMULATOR"
 				startGame: 	   "START GAME"
 				settings:	   "SETTINGS"
-				backward:	   "BACKWARD"
+				backward:	   "BACK"
 				musicVolume:   "MUSIC VOLUME"
 				language:	   "ENGLISH"
 				setLanguage:   "LANGUAGE: "
@@ -12,6 +12,8 @@
 				saveSettings2: "(APP WILL RESTART)"
 				poweredBy:     "powered by"
 				author:	       "malyutinegor.github.io"
+				source:        "OPEN SOURCE CODE"
+				sourceLink:    "https://github.com/malyutinegor/starsim"
 
 	russian:
 				name:      	   "STAR SIMULATOR"
@@ -26,8 +28,8 @@
 				saveSettings2: "(ПРИЛОЖЕНИЕ ПЕРЕЗАПУСТИТСЯ)"
 				poweredBy:     "powered by"
 				author:	       "malyutinegor.github.io"
+				source:        "ОТКРЫТЬ ИСХОДНЫЙ КОД"
+				sourceLink:    "https://github.com/malyutinegor/starsim"
 } 
-
-phrases.current = phrases.russian
 
 return phrases

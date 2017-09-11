@@ -3,7 +3,8 @@ all: gulp
 gulp:
 	gulp
 
-deps:
+dev:
+	luarocks install moonscript
 	npm i -g gulp-cli
 	npm i
 

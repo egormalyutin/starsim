@@ -48,11 +48,13 @@ love.run = ->
  
 
 defaultSize = () ->
-	love.window.setFullscreen 1
-	w, h = love.window.getMode()
+	love.resize = nil
+	w, h = love.window.getDesktopDimensions!
+	if w <= 1366 or h <= 768
+		love.window.setMode w, h,      { fullscreen: true } 
+
 	if w > 1366 or h > 768
-		love.window.setFullscreen 0
-		love.window.setMode 1366, 768
+		love.window.setMode 1366, 768, { centered: true }
 
 	-- Calculate window height and width
 	sizes.width, sizes.height = love.window.getMode!
@@ -69,7 +71,7 @@ defaultSize = () ->
 	sizes.scale = sizes.width / 1366
 	sizes.scaleY = sizes.height / 768
 
-	rooms.ui = {}
+	rooms.ui = {} if not rooms.ui
 
 	game.fonts = 
 		buttonSize: math.floor sizes.scale * 50
@@ -84,9 +86,20 @@ defaultSize = () ->
 	game.fonts.love = love.graphics.newFont "resources/fonts/love.woff", game.fonts.loveSize
 	game.fonts.author = love.graphics.newFont "resources/fonts/play.ttf", game.fonts.authorSize
 
-	if rooms[game.room]
-		if rooms[game.room].open
-			rooms[game.room].open game.room
+	game.preload   = {}
+
+	game.preload.printY  = (sizes.height / 2) - (((game.fonts.love\getHeight! * 2) + 150) / 2)
+
+	game.preload.y       = game.preload.printY + game.fonts.love\getHeight! * 2
+	game.preload.x 		 = (sizes.width  / 2) - (game.fonts.love\getWidth(phrases.poweredBy) / 2)
+
+	game.preload.authorX = (sizes.width  / 2) - (game.fonts.author\getWidth(phrases.author) / 2)
+	game.preload.authorY = (sizes.height / 2) - (game.fonts.author\getHeight! / 2)
+
+	
+
+	love.resize = defaultSize
+
 
 love.load = () ->
 	-- MoonScript requires
@@ -113,6 +126,26 @@ love.load = () ->
 		binser:			require 'scripts/libs/binser'
 		Audio:			require 'scripts/audio'
 		timer:			require 'scripts/libs/hump-timer'
+
+		musicTags: {
+			'music'
+		}
+
+		-- Data
+
+		saveData:
+			language: 'russian'
+			sound:    true
+
+		save: ->
+			love.filesystem.write game.dataFile, (game.binser.s game.saveData) 
+
+		loadData: ->
+			if love.filesystem.exists game.dataFile
+				readed = love.filesystem.read  game.dataFile
+				game.saveData = game.binser.dn readed
+
+		dataFile:   'data.dat'
 
 		-- Rooms
 		room: "empty"
@@ -161,14 +194,19 @@ love.load = () ->
 
 		setLanguage: (lang, room) ->
 			game.phrases.current = lang
-			love.graphics.clear!
 			w = game.fonts.menu\getWidth phrases.wait
 			h = game.fonts.menu\getHeight!
-
 			x = (sizes.width  / 2) - (w / 2)
 			y = (sizes.height / 2) - (h / 2)
 
+			love.graphics.clear!
+			love.graphics.origin!
 			game.text phrases.wait, x, y
+			love.graphics.present!
+
+			game.saveData.language = name for name, value in pairs game.phrases when value == lang and name ~= 'current'
+			game.save!
+
 			love.event.quit 'restart'
 
 		-- Sizes
@@ -177,6 +215,9 @@ love.load = () ->
 		preloadProgress: 0
 	}
 
+	game.loadData!
+	game.phrases.current = game.phrases[game.saveData.language]
+
 	sizes   = game.sizes
 	phrases = game.phrases.current
 	rooms   = game.rooms
@@ -184,11 +225,11 @@ love.load = () ->
 	------------------------------- WINDOW ---------------------------------
 	love.window.setTitle phrases.name
 	love.graphics.setBackgroundColor 0, 0, 0
-	love.window.setIcon love.image.newImageData 'resources/images/icon.png'
+	love.window.setIcon love.image.newImageData('resources/images/icon.png')
 	------------------------------------------------------------------------
 
 	game.audio  = {
-		menu:		game.Audio "resources/audio/menu.mp3"
+		menu:		game.Audio "music", "resources/audio/menu.mp3"
 	}
 
 	game.images = {
@@ -210,15 +251,7 @@ love.load = () ->
 
 	game.ui.update rooms.ui.all, nil, nil, 0
 
-	game.preload   = {}
-
-	game.preload.printY  = (sizes.height / 2) - (((game.fonts.love\getHeight! * 2) + 150) / 2)
-
-	game.preload.y       = game.preload.printY + game.fonts.love\getHeight! * 2
-	game.preload.x 		 = (sizes.width  / 2) - (game.fonts.love\getWidth(phrases.poweredBy) / 2)
-
-	game.preload.authorX = (sizes.width  / 2) - (game.fonts.author\getWidth(phrases.author) / 2)
-	game.preload.authorY = (sizes.height / 2) - (game.fonts.author\getHeight! / 2)
+	
 	return
 
 love.preload = ->

@@ -152,24 +152,24 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 		ui.bar.updatePositions!
 
 
-	preloaderName  = 'Lorem ipsum dolor sit amet, cononcdentrius dsdsd'
+	preloaderDescription = modes[mode].description
 	preloader = game.ui.Element {
 		draw: () =>
 			love.graphics.setColor 0, 0, 0, @data.alpha
 			love.graphics.rectangle 'fill', 0, 0, sizes.width, sizes.height
 			love.graphics.setColor 255, 255, 255, @data.alpha
 			love.graphics.setFont game.fonts.play
-			str = string.sub(preloaderName, 0, @data.text)
-			str ..= '_' if (#str % 3 == 1) and (#str ~= #preloaderName)
-			love.graphics.print str, 
-                sizes.position.y * 10,
+			-- str = string.sub(preloaderName, 0, @data.text)
+			-- str ..= '_' if (#str % 3 == 1) and (#str ~= #preloaderName)
+			love.graphics.print preloaderDescription, 
+                sizes.position.y * 10 - @data.text,
 				sizes.height - sizes.position.y * 10
 
 		z: 3
 
 		data: 
 			alpha: 0
-			text:  0
+			text:  game.fonts.menu\getWidth preloaderDescription
 
 		tags: { 'preloader' }
 	}
@@ -178,8 +178,8 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 		'in-out-linear'
 
 	game.timer.tween 1.5, preloader.data, 
-		{ text: #preloaderName },
-		'in-out-linear'
+		{ text: 0 },
+		'out-quad'
 
 	rooms.ui.all = game.ui.Filter { 'preloader' }
 	
@@ -189,7 +189,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 	game.playing.update  or= () ->
 	game.playing.draw    or= () ->
 
-	game.timer.after 4, =>
+	game.timer.after 6, =>
 		rooms.ui.all = game.ui.Filter { 'game', 'preloader' }
 
 		game.timer.tween 0.3, preloader.data,
