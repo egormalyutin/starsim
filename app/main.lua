@@ -79,12 +79,16 @@ defaultSize = function()
     buttonSize = math.floor(sizes.scale * 50),
     logoSize = math.floor(sizes.scale * 100),
     playSize = math.floor(sizes.scale * 25),
+    playLargeSize = math.floor(sizes.scale * 35),
     loveSize = math.floor(sizes.scale * 40),
+    smallSize = math.floor(sizes.scale * 12),
     authorSize = math.floor(sizes.scale * 60)
   }
   game.fonts.menu = love.graphics.newFont("resources/fonts/menu.ttf", game.fonts.buttonSize)
   game.fonts.logo = love.graphics.newFont("resources/fonts/logo.ttf", game.fonts.logoSize)
   game.fonts.play = love.graphics.newFont("resources/fonts/play.ttf", game.fonts.playSize)
+  game.fonts.playLarge = love.graphics.newFont("resources/fonts/play.ttf", game.fonts.playLargeSize)
+  game.fonts.small = love.graphics.newFont("resources/fonts/play.ttf", game.fonts.smallSize)
   game.fonts.love = love.graphics.newFont("resources/fonts/love.woff", game.fonts.loveSize)
   game.fonts.author = love.graphics.newFont("resources/fonts/play.ttf", game.fonts.authorSize)
   game.preload = { }
@@ -114,9 +118,7 @@ love.load = function()
     binser = require('scripts/libs/binser'),
     Audio = require('scripts/audio'),
     timer = require('scripts/libs/hump-timer'),
-    musicTags = {
-      'music'
-    },
+    musicTags = { },
     saveData = {
       language = 'russian',
       sound = true
@@ -170,20 +172,12 @@ love.load = function()
     },
     startGame = require('scripts/startGame'),
     phrases = require('scripts/phrases'),
-    getLanguage = function(mas)
-      if mas == nil then
-        mas = { }
-      end
-      local name
+    getLanguage = function()
       for name, value in pairs(game.phrases) do
-        if value == phrases then
-          name = lang
+        if value == phrases and name ~= 'current' then
+          return name
         end
       end
-      if mas[name] then
-        return mas[name]
-      end
-      return name
     end,
     setLanguage = function(lang, room)
       game.phrases.current = lang
@@ -255,10 +249,13 @@ love.update = function(dt)
     game.ui.update(game.rooms.ui.all)
   end
   if (game.room == "play") then
-    if game.playing then
-      game.playing.update(dt)
-    end
     game.ui.update(rooms.ui.all)
+    if game.playing and not game.preloader then
+      game.playing:update(dt)
+    end
+    if game.preloader then
+      game.preloader:update()
+    end
   end
   game.timer.update(dt)
   dev_enable()
@@ -273,10 +270,13 @@ love.draw = function()
     game.ui.draw(rooms.ui.all)
   end
   if (game.room == "play") then
-    if game.playing then
-      game.playing.draw()
+    if game.playing and not game.preloader then
+      game.playing:draw()
     end
     game.ui.draw(rooms.ui.all)
+    if game.preloader then
+      game.preloader:draw()
+    end
   end
   dev_enable()
   love.graphics.setFont(game.fonts.play)
@@ -285,8 +285,14 @@ love.draw = function()
 end
 love.resize = defaultSize
 love.mousepressed = function()
-  return game.ui.mousepressed(rooms.ui.all)
+  game.ui.mousepressed(rooms.ui.all)
+  if game.playing and not game.preloader then
+    return game.playing:mousepressed()
+  end
 end
 love.mousereleased = function()
-  return game.ui.mousereleased(rooms.ui.all)
+  game.ui.mousereleased(rooms.ui.all)
+  if game.playing and not game.preloader then
+    return game.playing:mousereleased()
+  end
 end

@@ -9,7 +9,6 @@ hc     = require _NAME .. '.HC'
 ui.mouse = hc.circle 0,0,1
 ui.mouse\moveTo(love.mouse.getPosition())
 
-ui.obj = hc.rectangle 100, 100, 200, 200
 
 -----------------------
 -- EVENTS
@@ -119,6 +118,8 @@ ui.Element = class
 		@kx = s.kx or 0
 		@ky = s.ky or 0
 		@z  = s.z  or 1
+		@tx = s.tx or 0
+		@ty = s.ty or 0
 
 		if not @x then @x = 0
 		if not @y then @y = 0
@@ -199,18 +200,19 @@ ui.Element = class
 		love.graphics.push 'all'
 
 		love.graphics.translate @x, @y
+		love.graphics.translate @tx, @ty
 		love.graphics.rotate @r
 		love.graphics.scale @sx, @sy
 		love.graphics.translate (-@ox), (-@oy)
 		love.graphics.shear @kx, @ky
-		@drawf @
+		@\drawf!
 
 		love.graphics.pop!
 
 	reshape: =>
 		@shape = hc.rectangle(
-			((@x - @ox) * @sx),
-			((@y - @oy) * @sy),
+			((@x - @ox + @tx) * @sx),
+			((@y - @oy + @ty) * @sy),
 			@width, @height
 		)
 		@shape\setRotation @r, @x, @y

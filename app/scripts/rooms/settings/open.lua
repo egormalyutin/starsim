@@ -55,7 +55,7 @@ return function()
       return love.window.minimize()
     end
   end)
-  rooms.ui.backward = rooms.ui.button(x, y + py * 4, phrases.backward, function()
+  rooms.ui.backward = rooms.ui.button(x, y + py * 4, phrases.back, function()
     return game.setRoom(game.roomHistory[#game.roomHistory - 1])
   end)
   game.audio.menu:play()

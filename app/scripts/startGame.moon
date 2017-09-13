@@ -1,18 +1,28 @@
 return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
-	rawModes = require 'modes/list'
+	rawModes = love.filesystem.getDirectoryItems 'modes' 
 
 	modes = {}
 
 	for name, path in pairs rawModes
-		modes[name] = require 'modes/' .. path 
+		modes[path] = require 'modes/' .. path 
 
 	if not modes[mode]
-		error 'Mode "' .. mode .. '" not found'
+		error 'Mode "' .. mode .. '" not exists'
+
+	if not modes[mode][game.getLanguage!]
+		print 'Mode "' .. mode .. '" for your language not exists. Using english...'
+
+	md = modes[mode][game.getLanguage!]
 
 	game.setRoom 'play'
 
-	Cls = modes[mode].new
-	ui        = {}
+	Cls = md.new
+	ui         = {}
+	ui.element = (s) ->
+		elem    = game.ui.Element s
+		elem.ty = sizes.scaleY * 50
+		elem\reshape!
+
 	ui.button = (text, x, y, pressed, border) ->
 		elem = nil
 		if border
@@ -71,6 +81,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 
 		elem
 
+
 	ui.line = (x, y) ->
 		line = game.ui.Element {
 			draw: =>
@@ -84,7 +95,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 			z: 1
 
 			width: 1
-			height: 25
+			height: ui.bar.height / 2
 		}
 
 		line
@@ -92,22 +103,24 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 	ui.bar = (=>
 		bar = game.ui.Element {
 			draw: =>
-				love.graphics.setColor 0x19, 0x1B, 0x1F, 150
-
 				-- love.graphics.draw(
 				-- 	game.images.sky, 
 				-- 	sizes.width / 2, sizes.height / 2, 
 				-- 	@data.angle, 
 				-- 	nil, nil, 
 				-- 	1920, 1080)
+				love.graphics.setScissor @x, @y, @width, @height
+				if @data.alpha < 255
+					love.graphics.setColor 255, 255, 255, 255
+					love.graphics.draw game.images.sky, sizes.width / 2, sizes.height / 2, @data.angle, nil, nil, 1920, 1080
+				love.graphics.setScissor!
 
+				love.graphics.setColor 0x19, 0x1B, 0x1F, @data.alpha
 				love.graphics.rectangle 'fill', 0, 0, @width, @height - 1 
 
 				love.graphics.setColor 255, 255, 255, 255
 				love.graphics.line 0, @height, @width, @height
 
-				love.graphics.setColor 0, 0, 0, 255
-				love.graphics.rectangle 'fill', 0, @height, @width, sizes.height 
 
 			update: =>
 				@data.angle += 0.0005
@@ -115,7 +128,10 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 
 			tags: { 'game' }
 
-			data: angle: 0
+			data: 
+				angle: 0
+				alpha: 255
+				height: sizes.scaleY * 50
 
 			x: 0
 			y: 0
@@ -126,6 +142,8 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 		}
 		bar
 	)()
+
+	ui.bar.separatorWidth = sizes.scale * 10
 
 	ui.bar.elements     = { { x: 0, width: 0 } }
 
@@ -138,47 +156,272 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 				last = elem
 				if elem.reshape then elem\reshape!
 			else
-				elem.x = last.x + last.width + 10
-				elem.y = ui.bar.height / 2 - (elem.height / 2)
-				last = elem
-				if elem.reshape then elem\reshape!
+				if elem ~= nil
+					elem.x = last.x + last.width + ui.bar.separatorWidth
+					elem.y = ui.bar.data.height / 2 - (elem.height / 2)
+					last   = elem
+					if elem.reshape then elem\reshape!
+				else
+					table.remove ui.bar.elements, _
 
 	ui.bar.button = (text, pressed) ->
 		lastElem = ui.bar.elements[#ui.bar.elements]
+		elem = (ui.button text, 0, 0, pressed)
 		table.insert(ui.bar.elements, 
-			(ui.button text, 0, 0, pressed))
+			elem)
+		line = (ui.line!)
 		table.insert(ui.bar.elements, 
-			(ui.line 0, 0))
+			line)
+		ui.bar.updatePositions!
+		elem._setText = elem.setText 
+
+		elem.setText = (text) =>
+			elem\_setText text
+			ui.bar.updatePositions!
+
+		elem, line
+
+	ui.bar.free = () ->
+		e = ui.bar.elements[#ui.bar.elements]
+		sizes.width - e.x + e.width
+
+	ui.bar.prevButton = (pressed) ->
+		elem = game.ui.Element {
+				draw: =>
+					if @hover
+						game.color 255, 255, 255, 150
+					else
+						game.color 255, 255, 255, 255
+					love.graphics.setFont game.fonts.play
+					love.graphics.print "<", 0, 0 
+
+				tags: { 'game', 'select' }
+
+				x: x
+				y: y
+
+				width:  (game.fonts.play\getWidth "<")
+				height: (game.fonts.play\getHeight!)
+
+				mousereleased: pressed
+			}
+		elem
+		table.insert(ui.bar.elements, elem)
 		ui.bar.updatePositions!
 
+	ui.bar.nextButton = (pressed) ->
+		elem = game.ui.Element {
+				draw: =>
+					if @hover
+						game.color 255, 255, 255, 150
+					else
+						game.color 255, 255, 255, 255
+					love.graphics.setFont game.fonts.play
+					love.graphics.print ">", 0, 0 
 
-	preloaderDescription = modes[mode].description
-	preloader = game.ui.Element {
+				tags: { 'game', 'select' }
+
+				width:  (game.fonts.play\getWidth ">")
+				height: (game.fonts.play\getHeight!)
+
+				mousereleased: pressed
+			}
+		elem
+		table.insert(ui.bar.elements, elem)
+		rooms.ui.all\update!
+		ui.bar.updatePositions!
+
+	ui.bar.select = (variants = {""}, changed = () ->, free, current) ->
+		res  = {}
+		con  = false
+		free = free!        if type(free) == 'function'
+		free = free         if type(free) ~= 'function'
+		free = ui.bar.free! if type(free) == 'nil'
+
+		slice = (tbl, p1, p2) ->
+			result = {}
+			while p1 <= p2
+				table.insert res, tbl[p1]
+				p1 += 1
+			result
+
+		getWidth = (text) -> game.fonts.play\getWidth text 
+
+		page = (tbl, plus) ->
+			local res
+			res   = 0
+			for str in *tbl
+				res += getWidth str
+				res += plus
+			res
+
+		pageM = (tbl, plus) ->
+			local res
+			res = page tbl, plus
+			res -= plus
+			res
+
+		clone = (tbl) ->
+			cloned = {}
+			for name, value in ipairs tbl
+				cloned[name] = value
+			cloned
+
+		
+		i = 1
+
+		push = ->
+			i += 1
+			res[i] = {} if not res[i]
+
+		separator = ui.bar.separatorWidth * 2 + 1
+
+		elem = (text, last) ->
+			ret = game.ui.Element {
+				draw: =>
+					if @hover
+						game.color 255, 255, 255, 150
+					else
+						game.color 255, 255, 255, 255
+					love.graphics.setFont game.fonts.play
+					love.graphics.print @_text, 0, 0 
+
+				tags: { 'game' }
+
+				width:  (game.fonts.play\getWidth text)
+				height: (game.fonts.play\getHeight!)
+
+				mousereleased: changed
+			}
+			table.insert(ui.bar.elements, ret)
+			line = nil
+			if not last
+				line = ui.line!
+				table.insert(ui.bar.elements, line)
+
+			ret._text = text
+			ret, line
+
+		for name, item in ipairs variants
+			local larger
+			res[i] = {} if not res[i]
+			table.insert res[i], item
+
+			if pageM(res[i], separator) > free
+				table.remove res[i], #res[i]
+				push!
+
+			if (pageM({ item }, separator) > free)
+				table.insert res[i], item
+
+		game.res = res 
+
+
+		for name, value in ipairs res[5]
+			if name == #res[5]
+				elem value, true
+			else
+				elem value
+
+		ui.bar\updatePositions!
+
+		res.nextButton = ui.bar.nextButton () ->
+			res.next!
+
+	
+
+	ui.bar.selectOne = (variants = {""}, changed) ->
+		res = {}
+
+		res.variants = variants
+		res.changed  = changed or ->
+		res.current  = 1
+
+		res.next = () ->
+			if (res.current + 1) <= #res.variants
+				res.current += 1
+				res.text.width = game.fonts.play\getWidth res.variants[res.current]
+				ui.bar.updatePositions!
+				res.changed res.current, res.variants[res.current]
+
+		res.prev = () ->
+			if (res.current - 1) >= 1 
+				res.current -= 1
+				res.text.width = game.fonts.play\getWidth res.variants[res.current]
+				ui.bar.updatePositions!
+				res.changed res.current, res.variants[res.current]
+
+		res.prevButton = ui.bar.prevButton () ->
+			res.prev!
+
+		res.text = game.ui.Element {
+			draw: =>
+					love.graphics.setFont game.fonts.play
+					love.graphics.print res.variants[res.current], 0, 0 
+
+				tags: { 'game', 'select' }
+
+				width:  (game.fonts.play\getWidth res.variants[1])
+				height: (game.fonts.play\getHeight!)
+
+				mousereleased: pressed
+		}
+		table.insert ui.bar.elements, res.text
+
+		res.nextButton = ui.bar.nextButton () ->
+			res.next!
+
+		ui.bar.updatePositions!
+
+		res.group   = game.ui.Filter { 'select' }
+		res.destroy = () -> game.ui.destroy res.group
+
+		res
+
+
+	preloaderLines       = (select(2, md.description\gsub("\n", "\n"))) + 1
+	preloaderDescription = md.description
+	preloaderName        = phrases.mode .. md.name
+	game.preloader = game.ui.Element {
 		draw: () =>
 			love.graphics.setColor 0, 0, 0, @data.alpha
 			love.graphics.rectangle 'fill', 0, 0, sizes.width, sizes.height
 			love.graphics.setColor 255, 255, 255, @data.alpha
-			love.graphics.setFont game.fonts.play
 			-- str = string.sub(preloaderName, 0, @data.text)
 			-- str ..= '_' if (#str % 3 == 1) and (#str ~= #preloaderName)
+			love.graphics.setFont game.fonts.playLarge
+			love.graphics.print preloaderName, 
+                sizes.position.y * 10 - @data.name,
+				sizes.height - (sizes.position.y * 20) - @data.nh 
+
+			love.graphics.setFont game.fonts.play
 			love.graphics.print preloaderDescription, 
                 sizes.position.y * 10 - @data.text,
-				sizes.height - sizes.position.y * 10
+				sizes.height - (sizes.position.y * 10) - (@data.th * preloaderLines)
 
 		z: 3
 
 		data: 
 			alpha: 0
-			text:  game.fonts.menu\getWidth preloaderDescription
+			text:  game.fonts.play\getWidth preloaderDescription
+			name:  game.fonts.play\getWidth preloaderName
+			th:    game.fonts.play\getHeight!
+			nh:    game.fonts.playLarge\getHeight!
 
 		tags: { 'preloader' }
 	}
-	game.timer.tween 0.7, preloader.data,  
+
+
+	game.timer.tween 0.7, game.preloader.data,  
 		{ alpha: 255 },  
 		'in-out-linear'
 
-	game.timer.tween 1.5, preloader.data, 
+	game.timer.tween 1.5, game.preloader.data, 
 		{ text: 0 },
+		'out-quad'
+
+	game.timer.tween 1.5, game.preloader.data, 
+		{ name: 0 },
 		'out-quad'
 
 	rooms.ui.all = game.ui.Filter { 'preloader' }
@@ -186,13 +429,44 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 	-- LOAD
 
 	game.playing = Cls ui, content
-	game.playing.update  or= () ->
-	game.playing.draw    or= () ->
 
-	game.timer.after 6, =>
+	game.playing.paused = false
+	game.playing.pause = () ->
+		ui.playButton\setText phrases.resume
+		game.timer.tween 0.7, ui.bar,
+			{ height: sizes.height + 1 },
+			'out-quad'
+		game.timer.tween 0.7, ui.bar.data,
+			{ alpha: 0 },
+			'out-quad'
+
+	game.playing.play = () ->
+		ui.playButton\setText phrases.pause
+		game.timer.tween 0.7, ui.bar,
+			{ height: sizes.scaleY * 50 },
+			'out-quad'
+		game.timer.tween 0.7, ui.bar.data,
+			{ alpha: 255 },
+			'out-quad'
+
+	game.playing.toggle = () ->
+		if game.playing.paused
+			game.playing.play!
+			game.playing.paused = false
+		else
+			game.playing.pause!
+			game.playing.paused = true
+
+	ui.playButton = ui.bar.button phrases.pause, () -> game.playing.toggle!
+
+	game.playing\start!
+
+	game.timer.after 5, =>
 		rooms.ui.all = game.ui.Filter { 'game', 'preloader' }
 
-		game.timer.tween 0.3, preloader.data,
+		game.timer.tween 0.3, game.preloader.data,
 			{alpha: 0},
 			'in-out-linear',
-			-> game.ui.destroy preloader
+			-> 
+				game.ui.destroy game.preloader
+				game.preloader  = nil

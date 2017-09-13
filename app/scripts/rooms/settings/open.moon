@@ -31,6 +31,7 @@ return () ->
 			switch num
 				when 1 then rooms.settings.lang = {game.phrases.russian, 'settings'}
 				when 2 then rooms.settings.lang = {game.phrases.english, 'settings'}
+
 		(->
 			if game.phrases.russian == game.phrases.current
 				return 1
@@ -54,7 +55,7 @@ return () ->
 				love.window.minimize!
 
 	rooms.ui.backward = rooms.ui.button x, y + py * 4, 
-		phrases.backward,
+		phrases.back,
 		() -> 
 			game.setRoom game.roomHistory[#game.roomHistory - 1]
 

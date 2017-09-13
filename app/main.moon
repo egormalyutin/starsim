@@ -74,17 +74,21 @@ defaultSize = () ->
 	rooms.ui = {} if not rooms.ui
 
 	game.fonts = 
-		buttonSize: math.floor sizes.scale * 50
-		logoSize:   math.floor sizes.scale * 100
-		playSize:   math.floor sizes.scale * 25
-		loveSize:   math.floor sizes.scale * 40
-		authorSize: math.floor sizes.scale * 60
+		buttonSize:    math.floor sizes.scale *  50
+		logoSize:      math.floor sizes.scale * 100
+		playSize:      math.floor sizes.scale *  25
+		playLargeSize: math.floor sizes.scale *  35
+		loveSize:      math.floor sizes.scale *  40
+		smallSize:     math.floor sizes.scale *  12
+		authorSize:    math.floor sizes.scale *  60
 
-	game.fonts.menu = love.graphics.newFont "resources/fonts/menu.ttf", game.fonts.buttonSize 
-	game.fonts.logo = love.graphics.newFont "resources/fonts/logo.ttf", game.fonts.logoSize
-	game.fonts.play = love.graphics.newFont "resources/fonts/play.ttf", game.fonts.playSize
-	game.fonts.love = love.graphics.newFont "resources/fonts/love.woff", game.fonts.loveSize
-	game.fonts.author = love.graphics.newFont "resources/fonts/play.ttf", game.fonts.authorSize
+	game.fonts.menu      = love.graphics.newFont "resources/fonts/menu.ttf",  game.fonts.buttonSize 
+	game.fonts.logo      = love.graphics.newFont "resources/fonts/logo.ttf",  game.fonts.logoSize
+	game.fonts.play      = love.graphics.newFont "resources/fonts/play.ttf",  game.fonts.playSize
+	game.fonts.playLarge = love.graphics.newFont "resources/fonts/play.ttf",  game.fonts.playLargeSize
+	game.fonts.small     = love.graphics.newFont "resources/fonts/play.ttf",  game.fonts.smallSize
+	game.fonts.love      = love.graphics.newFont "resources/fonts/love.woff", game.fonts.loveSize
+	game.fonts.author    = love.graphics.newFont "resources/fonts/play.ttf",  game.fonts.authorSize
 
 	game.preload   = {}
 
@@ -128,7 +132,7 @@ love.load = () ->
 		timer:			require 'scripts/libs/hump-timer'
 
 		musicTags: {
-			'music'
+			-- 'music'
 		}
 
 		-- Data
@@ -187,10 +191,8 @@ love.load = () ->
 		-- Languages
 		phrases: require 'scripts/phrases'	
 
-		getLanguage: (mas = {}) ->
-			name = lang for name, value in pairs game.phrases when value == phrases
-			if mas[name] then return mas[name]
-			return name
+		getLanguage: ->
+			return name for name, value in pairs game.phrases when value == phrases and name ~= 'current'
 
 		setLanguage: (lang, room) ->
 			game.phrases.current = lang
@@ -275,8 +277,9 @@ love.update = (dt) ->
 
 
 	if (game.room == "play")
-		game.playing.update dt if game.playing
 		game.ui.update rooms.ui.all
+		game.playing\update dt if game.playing and not game.preloader
+		game.preloader\update! if game.preloader
 
 	game.timer.update dt
 
@@ -298,8 +301,9 @@ love.draw = ->
 		game.ui.draw rooms.ui.all
 
 	if (game.room == "play")
-		game.playing.draw! if game.playing
+		game.playing\draw!   if game.playing and not game.preloader
 		game.ui.draw rooms.ui.all
+		game.preloader\draw! if game.preloader
 
 	dev_enable()
 	love.graphics.setFont game.fonts.play
@@ -313,6 +317,8 @@ love.resize = defaultSize
 
 love.mousepressed = () ->
 	game.ui.mousepressed rooms.ui.all
+	game.playing\mousepressed! if game.playing and not game.preloader
 
 love.mousereleased = ->
 	game.ui.mousereleased rooms.ui.all
+	game.playing\mousereleased! if game.playing and not game.preloader

@@ -5,7 +5,6 @@ local _NAME = (...)
 local hc = require(_NAME .. '.HC')
 ui.mouse = hc.circle(0, 0, 1)
 ui.mouse:moveTo(love.mouse.getPosition())
-ui.obj = hc.rectangle(100, 100, 200, 200)
 ui.draw = function(elements)
   if elements == nil then
     elements = { }
@@ -138,15 +137,16 @@ do
     draw = function(self)
       love.graphics.push('all')
       love.graphics.translate(self.x, self.y)
+      love.graphics.translate(self.tx, self.ty)
       love.graphics.rotate(self.r)
       love.graphics.scale(self.sx, self.sy)
       love.graphics.translate((-self.ox), (-self.oy))
       love.graphics.shear(self.kx, self.ky)
-      self:drawf(self)
+      self:drawf()
       return love.graphics.pop()
     end,
     reshape = function(self)
-      self.shape = hc.rectangle(((self.x - self.ox) * self.sx), ((self.y - self.oy) * self.sy), self.width, self.height)
+      self.shape = hc.rectangle(((self.x - self.ox + self.tx) * self.sx), ((self.y - self.oy + self.ty) * self.sy), self.width, self.height)
       return self.shape:setRotation(self.r, self.x, self.y)
     end,
     mousepressed = function(self, x, y, button)
@@ -251,6 +251,8 @@ do
       self.kx = s.kx or 0
       self.ky = s.ky or 0
       self.z = s.z or 1
+      self.tx = s.tx or 0
+      self.ty = s.ty or 0
       if not self.x then
         self.x = 0
       end

@@ -3,12 +3,12 @@ all: gulp
 gulp:
 	gulp
 
-dev:
+install:
 	luarocks install moonscript
 	npm i -g gulp-cli
 	npm i
 
-cm:
+compile:
 	coffee -w -b -c ./ &
 	./moonscript &
 	sleep infinity
