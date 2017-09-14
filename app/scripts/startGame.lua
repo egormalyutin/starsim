@@ -23,7 +23,8 @@ return function(mode, content)
   ui.element = function(s)
     local elem = game.ui.Element(s)
     elem.ty = sizes.scaleY * 50
-    return elem:reshape()
+    elem:reshape()
+    return elem
   end
   ui.button = function(text, x, y, pressed, border)
     local elem = nil
@@ -162,12 +163,14 @@ return function(mode, content)
       end
     end
   end
-  ui.bar.button = function(text, pressed)
+  ui.bar.button = function(text, pressed, last)
     local lastElem = ui.bar.elements[#ui.bar.elements]
     local elem = (ui.button(text, 0, 0, pressed))
     table.insert(ui.bar.elements, elem)
     local line = (ui.line())
-    table.insert(ui.bar.elements, line)
+    if not last then
+      table.insert(ui.bar.elements, line)
+    end
     ui.bar.updatePositions()
     elem._setText = elem.setText
     elem.setText = function(self, text)
@@ -175,6 +178,13 @@ return function(mode, content)
       return ui.bar.updatePositions()
     end
     return elem, line
+  end
+  ui.bar.remove = function(elem)
+    for name, value in pairs(ui.bar.elements) do
+      if value == elem then
+        table.remove(ui.bar.elements, name)
+      end
+    end
   end
   ui.bar.free = function()
     local e = ui.bar.elements[#ui.bar.elements]
@@ -249,6 +259,7 @@ return function(mode, content)
     if type(free) == 'nil' then
       free = ui.bar.free()
     end
+    local pos = 1
     local slice
     slice = function(tbl, p1, p2)
       local result = { }
@@ -310,7 +321,8 @@ return function(mode, content)
           return love.graphics.print(self._text, 0, 0)
         end,
         tags = {
-          'game'
+          'game',
+          'select-bar'
         },
         width = (game.fonts.play:getWidth(text)),
         height = (game.fonts.play:getHeight()),
@@ -321,6 +333,7 @@ return function(mode, content)
       if not last then
         line = ui.line()
         table.insert(ui.bar.elements, line)
+        table.insert(line.tags, "select-bar")
       end
       ret._text = text
       return ret, line
@@ -341,18 +354,47 @@ return function(mode, content)
         table.insert(res[i], item)
       end
     end
-    game.res = res
-    for name, value in ipairs(res[5]) do
-      if name == #res[5] then
-        elem(value, true)
-      else
-        elem(value)
+    local filter = game.ui.Filter({
+      'select-bar'
+    })
+    local destroy
+    destroy = function()
+      return game.ui.destroy(filter)
+    end
+    local update = nil
+    local lastPage
+    lastPage = function()
+      if pos - 1 >= 1 then
+        pos = pos - 1
+        return update()
       end
     end
-    ui.bar:updatePositions()
-    res.nextButton = ui.bar.nextButton(function()
-      return res.next()
-    end)
+    local nextPage
+    nextPage = function()
+      if pos + 1 <= #res then
+        pos = pos + 1
+        return update()
+      end
+    end
+    update = function()
+      destroy()
+      local lastButton = ui.bar.prevButton(function()
+        return lastPage()
+      end)
+      for name, value in ipairs(res[pos]) do
+        if name == #res[5] then
+          elem(value, true)
+        else
+          elem(value)
+        end
+      end
+      local nextButton = ui.bar.nextButton(function()
+        return nextPage()
+      end)
+      filter:update()
+      return ui.bar:updatePositions()
+    end
+    return update()
   end
   ui.bar.selectOne = function(variants, changed)
     if variants == nil then
@@ -446,7 +488,17 @@ return function(mode, content)
   rooms.ui.all = game.ui.Filter({
     'preloader'
   })
-  game.playing = Cls(ui, content)
+  local results
+  results = function(proc)
+    local text = "Вы выполнили задание на " .. proc .. "%! Это очень хороший результат!"
+    local w = game.fonts.play:getWidth(text)
+    love.graphics.clear()
+    love.graphics.origin()
+    love.graphics.print(text, sizes.width / 2 - w / 2, sizes.height / 2)
+    love.graphics.present()
+    return love.timer.sleep(5)
+  end
+  game.playing = Cls(ui, content, results)
   game.playing.paused = false
   game.playing.pause = function()
     ui.playButton:setText(phrases.resume)

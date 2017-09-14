@@ -2,8 +2,7 @@
 
 Audio = class
 	new: (tags, source, tp) =>
-		if type(source) == "string"
-			ex = (() ->
+		ex = (() ->
 				if type(tags) ~= 'table'
 					@tags = { tags } 
 				else
@@ -15,10 +14,11 @@ Audio = class
 							return true
 				false
 			)()
+		if type(source) == "string"
 			@source = love.audio.newSource source, tp
 			@source\setVolume 0 if not ex
 		else
-			@source = source\clone!
+			@source = source\clone! if not ex
 
 	play: () =>
 		if @source\isPaused!

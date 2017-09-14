@@ -79,6 +79,22 @@ gulp.task('exe:win64', function() {
   return gulp.src(['build/win64/star-simulator.exe', 'build/love/star-simulator.love']).pipe(concat('star-simulator.exe')).pipe(chmod(0x1ed)).pipe(gulp.dest('build/win64'));
 });
 
+gulp.task('zip:linux32', function() {
+  return gulp.src(['build/linux32/**/*']).pipe(zip.dest('build/linux32.zip'));
+});
+
+gulp.task('zip:linux64', function() {
+  return gulp.src(['build/linux64/**/*']).pipe(zip.dest('build/linux64.zip'));
+});
+
+gulp.task('zip:win32', function() {
+  return gulp.src(['build/win32/**/*']).pipe(zip.dest('build/win32.zip'));
+});
+
+gulp.task('zip:win64', function() {
+  return gulp.src(['build/win64/**/*']).pipe(zip.dest('build/win64.zip'));
+});
+
 gulp.task('exe', ['exe:linux32', 'exe:linux64', 'exe:win32', 'exe:win64']);
 
 gulp.task('build', function() {

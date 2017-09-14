@@ -9,6 +9,18 @@ return {
               "name"
             })
             self.stars = { }
+            local current = nil
+            local a = nil
+            self.ui.bar.button("ПРОВЕРИТЬ РЕЗУЛЬТАТЫ", function()
+              return self.checkResults(self:results())
+            end)
+            self.ui.bar.button("НАЗВАНИЕ ЗВЕЗДЫ: ", nil, true)
+            a = self.ui.bar.selectOne({
+              " "
+            }, function(var, text) end)
+            local sf = self
+            local rets = { }
+            self.rets = rets
             self.newStar = function(self, img, x, y, items, sx, sy)
               if sx == nil then
                 sx = 1
@@ -16,10 +28,11 @@ return {
               if sy == nil then
                 sy = 1
               end
+              local image = love.graphics.newImage(img)
               local ret = self.ui.element({
                 draw = function(self)
                   love.graphics.setColor(255, 255, 255)
-                  love.graphics.rectangle("fill", 0, 0, self.width, self.height)
+                  love.graphics.draw(image)
                   love.graphics.setFont(game.fonts.small)
                   if self._text then
                     return love.graphics.printf(self._text, 0, self.height + 1, self.width, 'center')
@@ -27,98 +40,50 @@ return {
                 end,
                 x = x,
                 y = y,
-                width = 100,
-                height = 100,
+                width = 106,
+                height = 106,
                 sx = sx,
                 sy = sy,
                 mousereleased = function(self)
-                  return error('SELECT')
+                  if not self._text then
+                    a.current = 1
+                  end
+                  if self._text then
+                    for name, value in pairs({
+                      "Звезда №1",
+                      "Звезда №2",
+                      "Звезда №3",
+                      "Звезда №4"
+                    }) do
+                      if self._text == value then
+                        a.current = name
+                      end
+                    end
+                  end
+                  a.variants = {
+                    "Звезда №1",
+                    "Звезда №2",
+                    "Звезда №3",
+                    "Звезда №4"
+                  }
+                  a.changed = function(_, text)
+                    self._text = text
+                  end
+                  a.text.width = game.fonts.play:getWidth(a.variants[1])
+                  self._text = a.variants[1]
+                  return sf.ui.bar.updatePositions()
                 end,
                 tags = {
                   'name'
                 }
               })
-              ret.items = items
-              ret.setItem = function(self, _text)
-                self._text = _text
-              end
+              return table.insert(rets, ret)
             end
-            self.star = self:newStar(100, 100)
-            self.ui.bar.select({
-              'LOL',
-              'KEKLOLKEK',
-              'sihfiusfhdsiussssssdhisuchsiuhnsiudhsiudsiduajsdiosjisdjsidhsiudshdishiushdsiuhdsiudhsiudhsiudhsiudhsiudhdsdjsoidsjdisjdoijdsoidjsssssssssssssssssssssssssssssssssssssssihfiusfhdsiussssssdhisuchsiuhnsiudhsiudsiduajsdiosjisdjsidhsiudshdishiushdsiuhdsiudhsiudhsiudhsiudhsiudhdsdjsoidsjdisjdoijdsoidjsssssssssssssssssssssssssssssssssssssssihfiusfhdsiussssssdhisuchsiuhnsiudhsiudsiduajsdiosjisdjsidhsiudshdishiushdsiuhdsiudhsiudhsiudhsiudhsiudhdsdjsoidsjdisjdoijdsoidjsssssssssssssssssssssssssssssssssssssssihfiusfhdsiussssssdhisuchsiuhnsiudhsiudsiduajsdiosjisdjsidhsiudshdishiushdsiuhdsiudhsiudhsiudhsiudhsiudhdsdjsoidsjdisjdoijdsoidjssssssssssssssssssssssssssssssssssssss',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd',
-              'sdds',
-              'dsdsd',
-              'dsdsd',
-              'dsdsd'
-            }, function(var, text) end)
+            self:newStar("resources/images/star1.png", 100, 100)
+            self:newStar("resources/images/star2.png", 300, 200)
+            self:newStar("resources/images/star3.png", 700, 200)
+            self:newStar("resources/images/star4.png", 900, 500)
+            sf.ui.bar.updatePositions()
             return self.filter:update()
           end,
           update = function(self)
@@ -132,12 +97,29 @@ return {
           end,
           mousereleased = function(self)
             return game.ui.mousereleased(self.filter)
+          end,
+          results = function(self)
+            local proc = 0
+            game.ret = self.rets[1]
+            if self.rets[1]._text == "Звезда №1" then
+              proc = proc + 25
+            end
+            if self.rets[2]._text == "Звезда №2" then
+              proc = proc + 25
+            end
+            if self.rets[3]._text == "Звезда №3" then
+              proc = proc + 25
+            end
+            if self.rets[4]._text == "Звезда №4" then
+              proc = proc + 25
+            end
+            return proc
           end
         }
         _base_0.__index = _base_0
         _class_0 = setmetatable({
-          __init = function(self, ui, content)
-            self.ui, self.content = ui, content
+          __init = function(self, ui, content, checkResults)
+            self.ui, self.content, self.checkResults = ui, content, checkResults
           end,
           __base = _base_0,
           __name = nil

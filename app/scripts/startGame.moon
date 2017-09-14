@@ -22,6 +22,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 		elem    = game.ui.Element s
 		elem.ty = sizes.scaleY * 50
 		elem\reshape!
+		elem
 
 	ui.button = (text, x, y, pressed, border) ->
 		elem = nil
@@ -164,14 +165,14 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 				else
 					table.remove ui.bar.elements, _
 
-	ui.bar.button = (text, pressed) ->
+	ui.bar.button = (text, pressed, last) ->
 		lastElem = ui.bar.elements[#ui.bar.elements]
 		elem = (ui.button text, 0, 0, pressed)
 		table.insert(ui.bar.elements, 
 			elem)
 		line = (ui.line!)
 		table.insert(ui.bar.elements, 
-			line)
+			line) if not last
 		ui.bar.updatePositions!
 		elem._setText = elem.setText 
 
@@ -180,6 +181,10 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 			ui.bar.updatePositions!
 
 		elem, line
+
+	ui.bar.remove = (elem) ->
+		for name, value in pairs ui.bar.elements
+			table.remove ui.bar.elements, name if value == elem
 
 	ui.bar.free = () ->
 		e = ui.bar.elements[#ui.bar.elements]
@@ -237,6 +242,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 		free = free!        if type(free) == 'function'
 		free = free         if type(free) ~= 'function'
 		free = ui.bar.free! if type(free) == 'nil'
+		pos  = 1
 
 		slice = (tbl, p1, p2) ->
 			result = {}
@@ -286,7 +292,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 					love.graphics.setFont game.fonts.play
 					love.graphics.print @_text, 0, 0 
 
-				tags: { 'game' }
+				tags: { 'game', 'select-bar' }
 
 				width:  (game.fonts.play\getWidth text)
 				height: (game.fonts.play\getHeight!)
@@ -298,6 +304,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 			if not last
 				line = ui.line!
 				table.insert(ui.bar.elements, line)
+				table.insert line.tags, "select-bar"
 
 			ret._text = text
 			ret, line
@@ -314,21 +321,37 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 			if (pageM({ item }, separator) > free)
 				table.insert res[i], item
 
-		game.res = res 
+		filter = game.ui.Filter { 'select-bar' }
 
+		destroy = () ->
+			game.ui.destroy filter
 
-		for name, value in ipairs res[5]
-			if name == #res[5]
-				elem value, true
-			else
-				elem value
+		update = nil
 
-		ui.bar\updatePositions!
+		lastPage = ->
+			if pos - 1 >= 1
+				pos -= 1
+				update!
 
-		res.nextButton = ui.bar.nextButton () ->
-			res.next!
+		nextPage = ->
+			if pos + 1 <= #res
+				pos += 1
+				update!
 
-	
+		update = () ->
+			destroy!
+			lastButton = ui.bar.prevButton () -> lastPage!
+			for name, value in ipairs res[pos]
+				if name == #res[5]
+					elem value, true
+				else
+					elem value
+			nextButton = ui.bar.nextButton () -> nextPage! 
+
+			filter\update!
+			ui.bar\updatePositions!
+
+		update!
 
 	ui.bar.selectOne = (variants = {""}, changed) ->
 		res = {}
@@ -374,7 +397,8 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 		ui.bar.updatePositions!
 
 		res.group   = game.ui.Filter { 'select' }
-		res.destroy = () -> game.ui.destroy res.group
+		res.destroy = () -> 
+			game.ui.destroy res.group
 
 		res
 
@@ -428,7 +452,17 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 	
 	-- LOAD
 
-	game.playing = Cls ui, content
+	results = (proc) ->
+		text = "Вы выполнили задание на " .. proc .. "%! Это очень хороший результат!"
+		w    = game.fonts.play\getWidth text
+		love.graphics.clear!
+		love.graphics.origin!
+		love.graphics.print text, sizes.width / 2 - w / 2, sizes.height / 2
+
+		love.graphics.present!
+		love.timer.sleep 5
+
+	game.playing = Cls ui, content, results
 
 	game.playing.paused = false
 	game.playing.pause = () ->

@@ -45,30 +45,32 @@ do
   _base_0.__index = _base_0
   _class_0 = setmetatable({
     __init = function(self, tags, source, tp)
-      if type(source) == "string" then
-        local ex = (function()
-          if type(tags) ~= 'table' then
-            self.tags = {
-              tags
-            }
-          else
-            self.tags = tags
-          end
-          for _, tag in pairs(game.musicTags) do
-            for _, tag2 in pairs(self.tags) do
-              if tag == tag2 then
-                return true
-              end
+      local ex = (function()
+        if type(tags) ~= 'table' then
+          self.tags = {
+            tags
+          }
+        else
+          self.tags = tags
+        end
+        for _, tag in pairs(game.musicTags) do
+          for _, tag2 in pairs(self.tags) do
+            if tag == tag2 then
+              return true
             end
           end
-          return false
-        end)()
+        end
+        return false
+      end)()
+      if type(source) == "string" then
         self.source = love.audio.newSource(source, tp)
         if not ex then
           return self.source:setVolume(0)
         end
       else
-        self.source = source:clone()
+        if not ex then
+          self.source = source:clone()
+        end
       end
     end,
     __base = _base_0,

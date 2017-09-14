@@ -42,7 +42,7 @@ ui.update = function(elements, x, y, dt)
     element:update(x, y)
   end
 end
-ui.destroy = function(elements)
+ui.destroy = function(elements, check)
   if elements == nil then
     elements = { }
   end
@@ -50,8 +50,16 @@ ui.destroy = function(elements)
   for _, element in pairs(args) do
     for name, destroy in pairs(ui.elements) do
       if destroy == element then
+        element = nil
         destroy = nil
         table.remove(ui.elements, name)
+      end
+    end
+  end
+  if check then
+    for name, destroy in pairs(check) do
+      if destroy == element then
+        table.remove(check, name)
       end
     end
   end

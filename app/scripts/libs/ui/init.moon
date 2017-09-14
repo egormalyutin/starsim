@@ -35,13 +35,20 @@ ui.update = (elements = {}, x, y, dt) ->
 	for name, element in pairs args
 		element\update x, y
 
-ui.destroy = (elements = {}) ->
+ui.destroy = (elements = {}, check) ->
 	args = ui.__pipeArray elements
 	for _, element in pairs args
 		for name, destroy in pairs ui.elements
 			if destroy == element
+				element = nil
 				destroy = nil
 				table.remove ui.elements, name 
+
+	if check
+		for name, destroy in pairs check
+			if destroy == element
+				table.remove check, name 
+
 
 
 -----------------------
