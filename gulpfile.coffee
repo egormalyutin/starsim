@@ -98,6 +98,12 @@ gulp.task 'exe:win64', () ->
 		.pipe chmod 0o755
 		.pipe gulp.dest 'build/win64'
 
+gulp.task 'exe', ['exe:linux32', 'exe:linux64', 'exe:win32', 'exe:win64']
+
+###########################
+# ZIP
+###########################
+
 gulp.task 'zip:linux32', () ->
 	gulp.src ['build/linux32/**/*']
 		.pipe zip.dest 'build/linux32.zip'
@@ -114,7 +120,7 @@ gulp.task 'zip:win64', () ->
 	gulp.src ['build/win64/**/*']
 		.pipe zip.dest 'build/win64.zip'
 
-gulp.task 'exe', ['exe:linux32', 'exe:linux64', 'exe:win32', 'exe:win64']
+gulp.task 'zip', ['zip:linux32', 'zip:linux64', 'zip:win32', 'zip:win64']
 
 ###########################
 # BUILD
@@ -128,6 +134,7 @@ gulp.task 'build', () ->
 		'dist:vendor'
 		'package:love'
 		'exe'
+		'zip'
 	)
 
 gulp.task 'default', [ 'build' ]

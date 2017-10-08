@@ -83,6 +83,34 @@ return function(mode, content)
     rooms.ui.all:update()
     return elem
   end
+  ui.getSize = function(ww, wh, w, h)
+    local scale = 1
+    if ww < w then
+      if scale > ww / w then
+        scale = ww / w
+      end
+    end
+    if wh < h then
+      if scale > wh / h then
+        scale = wh / h
+      end
+    end
+    return w * scale, h * scale, scale
+  end
+  ui.getScale = function(ww, wh, w, h)
+    local scale = 1
+    if ww < w then
+      if scale > ww / w then
+        scale = ww / w
+      end
+    end
+    if wh < h then
+      if scale > wh / h then
+        scale = wh / h
+      end
+    end
+    return scale
+  end
   ui.line = function(x, y)
     local line = game.ui.Element({
       draw = function(self)
@@ -133,6 +161,8 @@ return function(mode, content)
     })
     return bar
   end)()
+  ui.height = sizes.height - sizes.scaleY * 50
+  ui.width = sizes.width
   ui.bar.separatorWidth = sizes.scale * 10
   ui.bar.elements = {
     {
@@ -167,7 +197,10 @@ return function(mode, content)
     local lastElem = ui.bar.elements[#ui.bar.elements]
     local elem = (ui.button(text, 0, 0, pressed))
     table.insert(ui.bar.elements, elem)
-    local line = (ui.line())
+    local line
+    if not last then
+      line = (ui.line())
+    end
     if not last then
       table.insert(ui.bar.elements, line)
     end
@@ -490,7 +523,7 @@ return function(mode, content)
   })
   local results
   results = function(proc)
-    local text = "Вы выполнили задание на " .. proc .. "%! Это очень хороший результат!"
+    local text = "Вы выполнили задание на " .. proc .. "%!"
     local w = game.fonts.play:getWidth(text)
     love.graphics.clear()
     love.graphics.origin()

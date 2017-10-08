@@ -82,6 +82,33 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 
 		elem
 
+	ui.getSize = (ww, wh, w, h) ->
+		scale = 1
+
+		if ww < w
+			if scale > ww / w
+				scale = ww / w
+
+		if wh < h
+			if scale > wh / h
+				scale = wh / h
+
+		w * scale, h * scale, scale
+
+	ui.getScale = (ww, wh, w, h) ->
+		scale = 1
+
+		if ww < w
+			if scale > ww / w
+				scale = ww / w
+
+		if wh < h
+			if scale > wh / h
+				scale = wh / h
+
+		scale
+
+
 
 	ui.line = (x, y) ->
 		line = game.ui.Element {
@@ -144,6 +171,9 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 		bar
 	)()
 
+	ui.height = sizes.height - sizes.scaleY * 50
+	ui.width  = sizes.width
+
 	ui.bar.separatorWidth = sizes.scale * 10
 
 	ui.bar.elements     = { { x: 0, width: 0 } }
@@ -170,7 +200,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 		elem = (ui.button text, 0, 0, pressed)
 		table.insert(ui.bar.elements, 
 			elem)
-		line = (ui.line!)
+		line = (ui.line!) if not last
 		table.insert(ui.bar.elements, 
 			line) if not last
 		ui.bar.updatePositions!
@@ -453,7 +483,7 @@ return (mode = (error 'Mode is nil'), content = (error 'Content is nil')) ->
 	-- LOAD
 
 	results = (proc) ->
-		text = "Вы выполнили задание на " .. proc .. "%! Это очень хороший результат!"
+		text = "Вы выполнили задание на " .. proc .. "%!"
 		w    = game.fonts.play\getWidth text
 		love.graphics.clear!
 		love.graphics.origin!

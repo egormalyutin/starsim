@@ -119,6 +119,7 @@ love.load = function()
     Audio = require('scripts/audio'),
     timer = require('scripts/libs/hump-timer'),
     musicTags = { },
+    muted = true,
     saveData = {
       language = 'russian',
       sound = true

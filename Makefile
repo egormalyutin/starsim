@@ -10,5 +10,8 @@ install:
 
 compile:
 	coffee -w -b -c ./ &
-	./moonscript &
+	moonc -w ./ &
 	sleep infinity
+
+moonscript:
+	echo $1

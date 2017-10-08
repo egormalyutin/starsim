@@ -79,6 +79,8 @@ gulp.task('exe:win64', function() {
   return gulp.src(['build/win64/star-simulator.exe', 'build/love/star-simulator.love']).pipe(concat('star-simulator.exe')).pipe(chmod(0x1ed)).pipe(gulp.dest('build/win64'));
 });
 
+gulp.task('exe', ['exe:linux32', 'exe:linux64', 'exe:win32', 'exe:win64']);
+
 gulp.task('zip:linux32', function() {
   return gulp.src(['build/linux32/**/*']).pipe(zip.dest('build/linux32.zip'));
 });
@@ -95,10 +97,10 @@ gulp.task('zip:win64', function() {
   return gulp.src(['build/win64/**/*']).pipe(zip.dest('build/win64.zip'));
 });
 
-gulp.task('exe', ['exe:linux32', 'exe:linux64', 'exe:win32', 'exe:win64']);
+gulp.task('zip', ['zip:linux32', 'zip:linux64', 'zip:win32', 'zip:win64']);
 
 gulp.task('build', function() {
-  return seq(['clean:build', 'clean:dist'], ['copy:buildfiles', 'copy:dist'], ['dist:lua', 'dist:images'], 'dist:vendor', 'package:love', 'exe');
+  return seq(['clean:build', 'clean:dist'], ['copy:buildfiles', 'copy:dist'], ['dist:lua', 'dist:images'], 'dist:vendor', 'package:love', 'exe', 'zip');
 });
 
 gulp.task('default', ['build']);

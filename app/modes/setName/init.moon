@@ -18,6 +18,16 @@ return {
 
 				sf = @
 
+				@sky  = love.graphics.newImage 'modes/setName/sky.png'
+				@skyW = @sky\getWidth!
+				@skyH = @sky\getHeight!
+
+				@skyCW, @skyCH, @skyS = @ui.getSize @ui.width, @ui.height, @skyW, @skyH
+
+				@skyX = @ui.width  / 2 - @skyCW / 2
+				@skyY = @ui.height / 2 - @skyCH / 2
+
+
 				rets = {}
 				@rets = rets
 
@@ -75,6 +85,7 @@ return {
 			update: () =>
 				game.ui.update @filter
 			draw: () =>
+				love.graphics.draw @sky, @skyX, @skyY + @ui.bar.height, nil, @skyS
 				game.ui.draw @filter
 			mousepressed: () =>
 				game.ui.mousepressed @filter

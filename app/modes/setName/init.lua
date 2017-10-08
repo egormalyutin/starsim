@@ -19,6 +19,12 @@ return {
               " "
             }, function(var, text) end)
             local sf = self
+            self.sky = love.graphics.newImage('modes/setName/sky.png')
+            self.skyW = self.sky:getWidth()
+            self.skyH = self.sky:getHeight()
+            self.skyCW, self.skyCH, self.skyS = self.ui.getSize(self.ui.width, self.ui.height, self.skyW, self.skyH)
+            self.skyX = self.ui.width / 2 - self.skyCW / 2
+            self.skyY = self.ui.height / 2 - self.skyCH / 2
             local rets = { }
             self.rets = rets
             self.newStar = function(self, img, x, y, items, sx, sy)
@@ -90,6 +96,7 @@ return {
             return game.ui.update(self.filter)
           end,
           draw = function(self)
+            love.graphics.draw(self.sky, self.skyX, self.skyY + self.ui.bar.height, nil, self.skyS)
             return game.ui.draw(self.filter)
           end,
           mousepressed = function(self)

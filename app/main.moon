@@ -134,6 +134,7 @@ love.load = () ->
 		musicTags: {
 			-- 'music'
 		}
+		muted: true
 
 		-- Data
 
