@@ -41,7 +41,7 @@ love.run = ->
 			if love.preload and game.preloadProgress ~= 2
 				love.preload()
 			else
-				if love.draw then love.draw() 
+				if love.draw then love.draw()
 			love.graphics.present()
  
 		if love.timer then love.timer.sleep(0.001)
